@@ -5,7 +5,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import { searchPlacesByKeyword } from '../lib/kakao.js';
+import { searchPlacesByKeyword, MYONGJI_SEOUL_COORDS } from '../lib/kakao.js';
 
 // 식당 키워드 검색 컨트롤러 (카카오 로컬 API 연동)
 export async function searchPlaces(req: Request, res: Response, next: NextFunction) {
@@ -22,8 +22,15 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    // src/lib/kakao.ts의 검색 함수 호출
-    const searchResult = await searchPlacesByKeyword(query, { page, size });
+    // 명지대학교 인문캠퍼스(서울 서대문구 거북골로) 기준 반경 1.5km(1500m) 내 검색
+    const searchResult = await searchPlacesByKeyword(query, {
+      page,
+      size,
+      x: MYONGJI_SEOUL_COORDS.x,
+      y: MYONGJI_SEOUL_COORDS.y,
+      radius: 1500,
+      sort: 'distance',
+    });
 
     res.json({
       success: true,

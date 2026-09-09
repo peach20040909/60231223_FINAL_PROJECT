@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>혼밥 난이도 지도 (solo-map) - 명지대 인문캠퍼스</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <span class="logo-icon">🍜</span>
+        <span class="logo-title">solo-map</span>
+        <span class="logo-badge">명지대 인문캠퍼스</span>
+      </div>
+      <div class="nav-links">
+        <span class="server-status-pill">
+          <span class="status-dot"></span> 서버 연결됨 (Express 5)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 히어로 & 검색 섹션 -->
+  <main class="main-container">
+    <section class="hero-section">
+      <h1 class="hero-title">
+        혼자 밥 먹기 편한 식당,<br>
+        <span class="highlight">혼밥 난이도</span>로 쉽게 찾아보세요!
+      </h1>
+      <p class="hero-desc">
+        서대문구 거북골로 명지대 인문캠퍼스 주변의 식당을 검색하고 난이도별 리뷰를 확인하세요.
+      </p>
+
+      <!-- 검색창 -->
+      <form id="search-form" class="search-box">
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="키워드 검색 (예: 혼밥, 라멘, 마라탕, 분식, 돈까스)" 
+          value="혼밥"
+          autocomplete="off"
+        />
+        <button type="submit" id="search-btn">
+          <span>식당 검색</span>
+        </button>
+      </form>
+
+      <!-- 빠른 추천 태그 -->
+      <div class="quick-tags">
+        <span class="tag-label">추천 검색:</span>
+        <button type="button" class="quick-tag" data-query="혼밥">#혼밥추천</button>
+        <button type="button" class="quick-tag" data-query="라멘">#라멘</button>
+        <button type="button" class="quick-tag" data-query="마라탕">#마라탕</button>
+        <button type="button" class="quick-tag" data-query="국밥">#국밥</button>
+        <button type="button" class="quick-tag" data-query="돈까스">#돈까스</button>
+        <button type="button" class="quick-tag" data-query="버거">#버거</button>
+      </div>
+    </section>
+
+    <!-- 혼밥 난이도 가이드 카드 -->
+    <section class="difficulty-guide">
+      <div class="guide-item lv1">
+        <span class="guide-badge">Lv.1</span>
+        <strong>초급 혼밥</strong>
+        <p>패스트푸드, 편의점, 분식</p>
+      </div>
+      <div class="guide-item lv2">
+        <span class="guide-badge">Lv.2</span>
+        <strong>바 테이블</strong>
+        <p>라멘집, 1인석 식당</p>
+      </div>
+      <div class="guide-item lv3">
+        <span class="guide-badge">Lv.3</span>
+        <strong>일반 식당</strong>
+        <p>백반, 국밥, 중국집</p>
+      </div>
+      <div class="guide-item lv4">
+        <span class="guide-badge">Lv.4</span>
+        <strong>고급 혼밥</strong>
+        <p>패밀리레스토랑, 뷔페</p>
+      </div>
+      <div class="guide-item lv5">
+        <span class="guide-badge">Lv.5</span>
+        <strong>혼밥 마스터</strong>
+        <p>고깃집, 술집, 횟집</p>
+      </div>
+    </section>
+
+    <!-- 검색 결과 헤더 -->
+    <div class="results-header">
+      <h2 id="results-title">명지대 인문캠퍼스 주변 식당</h2>
+      <span id="results-count" class="results-count">검색 중...</span>
+    </div>
+
+    <!-- 식당 카드 리스트 그리드 -->
+    <section id="places-grid" class="places-grid">
+      <!-- 자바스크립트로 카드가 동적 생성됩니다 -->
+    </section>
+  </main>
+
+  <!-- 리뷰 작성 체험 모달 팝업 -->
+  <div id="review-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-place-name">식당 이름</h3>
+        <button id="modal-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-place-info" id="modal-place-address">주소 정보</p>
+        
+        <div class="form-group">
+          <label>혼밥 난이도 선택 (1~5)</label>
+          <div class="difficulty-picker">
+            <button type="button" class="diff-btn active" data-level="1">Lv.1 (초급)</button>
+            <button type="button" class="diff-btn" data-level="2">Lv.2 (바테이블)</button>
+            <button type="button" class="diff-btn" data-level="3">Lv.3 (일반)</button>
+            <button type="button" class="diff-btn" data-level="4">Lv.4 (용기필요)</button>
+            <button type="button" class="diff-btn" data-level="5">Lv.5 (마스터)</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="review-content">혼밥 관점 리뷰 (좌석 형태, 분위기 등)</label>
+          <textarea id="review-content" rows="4" placeholder="예: 1인 바 테이블이 있어서 눈치 안 보고 먹기 좋아요! 물과 반찬도 셀프입니다."></textarea>
+        </div>
+
+        <button type="button" id="submit-review-btn" class="submit-btn">리뷰 등록하기 (체험용)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/main.js"></script>
+</body>
+</html>
