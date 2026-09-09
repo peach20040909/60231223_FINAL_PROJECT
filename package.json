@@ -1,0 +1,30 @@
+{
+  "name": "solo-map",
+  "version": "1.0.0",
+  "description": "혼밥 난이도 지도 - 식당별 혼밥 난이도 및 리뷰 공유 서비스",
+  "type": "module",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "start": "node dist/app.js"
+  },
+  "keywords": [
+    "solo-map",
+    "express5",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
