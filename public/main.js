@@ -8,259 +8,116 @@
  */
 
 // 음식 카테고리별 고품질 썸네일 이미지 매핑 (Unsplash Curated & 100% 정상 로드 검증)
-// 음식 카테고리 & 세부 메뉴별 검증된 고화질 이미지 풀 (Unsplash Curated & 100% 정상 로드)
-// 고유 시드(식당 ID/이름) 기반 해시 분배로 인접 식당 간 중복 사진 방지!
-const FOOD_POOLS = {
-  // 보쌈 / 족발 (배가보쌈, 청춘보쌈 등)
-  bossam: [
-    'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 두루치기 / 불고기 / 제육볶음 (만득이네두루치기 등)
-  duruchigi: [
-    'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 찜닭 / 닭요리 (동궁찜닭, 두찜 등)
-  jjimdak: [
-    'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1607301406259-dfb186e15de8?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 삼겹살 / 고깃집 / 불판구이 (먹으면돼지 등)
-  samgyeopsal: [
-    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 곱창 / 막창 / 대창구이
-  gopchang: [
-    'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 뚝배기 국밥 / 순대국 / 설렁탕 (봉구네, 뚱구순대국 등)
-  gukbap: [
-    'https://images.unsplash.com/photo-1547928576-a4a33237cbc3?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 한식 / 가정식 백반 / 비빔밥 / 한상차림 (부안식당 등)
-  baekban: [
-    'https://images.unsplash.com/photo-1580651315530-69c8e0026377?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 찌개 / 전골 / 김치찌개 / 된장찌개 / 순두부
-  stew: [
-    'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1547928576-a4a33237cbc3?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 떡볶이 / 즉석떡볶이 / 분식
-  tteokbokki: [
-    'https://images.unsplash.com/photo-1628294895950-9805252327bc?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 패스트푸드 / 햄버거
-  burger: [
-    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 일식 라멘 / 우동 / 소바
-  ramen: [
-    'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 돈까스 / 일식 카레
-  cutlet: [
-    'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 토스트 / 김밥 / 샌드위치 / 간편 도시락
-  snack: [
-    'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 중식 / 마라탕 / 짬뽕 / 짜장
-  chinese: [
-    'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 피자 / 파스타 / 양식
-  pizza: [
-    'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 초밥 / 스시 / 횟집
-  sushi: [
-    'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 샐러드 / 포케
-  salad: [
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-  ],
-  // 기본 기본값 (풍성한 맛집 테이블)
-  default: [
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-  ],
-};
+// 카테고리 & 세부 메뉴별 3D 감성 이모지 및 테마 컬러 매핑 (모던 클린 카드 UI)
+function getCategoryEmoji(category = '', name = '') {
+  const t = `${category} ${name}`.toLowerCase();
 
-function pickFromPool(pool, seed = '') {
-  if (!pool || pool.length === 0) return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80';
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash |= 0;
-  }
-  const index = Math.abs(hash) % pool.length;
-  return pool[index];
-}
-
-function getCategoryPhoto(category = '', name = '', id = '') {
-  const target = `${category || ''} ${name || ''}`.toLowerCase();
-  const seed = `${name}_${id}_${category}`;
-
-  // 1. 찜닭 / 닭요리 / 치킨 (동궁찜닭, 두찜 등) - 카카오의 "육류,고기 > 닭요리"보다 세부 메뉴 우선!
-  if (
-    target.includes('찜닭') || target.includes('두찜') || target.includes('동궁') ||
-    target.includes('닭요리') || target.includes('닭볶음') || target.includes('치킨')
-  ) {
-    return pickFromPool(FOOD_POOLS.jjimdak, seed);
+  // 1. 뷔페 / 패밀리레스토랑 / 애슐리
+  if (t.includes('뷔페') || t.includes('패밀리레스토랑') || t.includes('애슐리') || t.includes('샐러드바')) {
+    return { icon: '🍽️', bg: '#f3e8ff', color: '#7e22ce' };
   }
 
-  // 2. 보쌈 / 족발 (배가보쌈, 청춘보쌈 등)
-  if (target.includes('보쌈') || target.includes('족발')) {
-    return pickFromPool(FOOD_POOLS.bossam, seed);
+  // 2. 찜닭 / 닭요리 / 치킨
+  if (t.includes('찜닭') || t.includes('두찜') || t.includes('동궁') || t.includes('닭요리') || t.includes('닭볶음') || t.includes('치킨')) {
+    return { icon: '🍗', bg: '#ffedd5', color: '#c2410c' };
   }
 
-  // 3. 두루치기 / 불고기 / 제육볶음 / 주물럭 (만득이네두루치기 등)
-  if (
-    target.includes('두루치기') || target.includes('불고기') || target.includes('제육') ||
-    target.includes('주물럭') || target.includes('쌈밥')
-  ) {
-    return pickFromPool(FOOD_POOLS.duruchigi, seed);
+  // 3. 보쌈 / 족발
+  if (t.includes('보쌈') || t.includes('족발')) {
+    return { icon: '🥓', bg: '#fef2f2', color: '#b91c1c' };
   }
 
-  // 4. 곱창 / 막창 / 대창 / 양곱창구이
-  if (target.includes('곱창') || target.includes('막창') || target.includes('대창')) {
-    return pickFromPool(FOOD_POOLS.gopchang, seed);
+  // 4. 두루치기 / 불고기 / 제육볶음 / 쌈밥
+  if (t.includes('두루치기') || t.includes('불고기') || t.includes('제육') || t.includes('주물럭') || t.includes('쌈밥')) {
+    return { icon: '🍳', bg: '#fff1eb', color: '#ea580c' };
   }
 
-  // 5. 순대국 / 국밥 / 설렁탕 / 곰탕 / 해장국 / 추어탕 / 도가니 (봉구네, 뚱구순대국 등)
-  if (
-    target.includes('국밥') || target.includes('순대') || target.includes('설렁탕') ||
-    target.includes('곰탕') || target.includes('해장국') || target.includes('추어탕') ||
-    target.includes('도가니')
-  ) {
-    return pickFromPool(FOOD_POOLS.gukbap, seed);
+  // 5. 곱창 / 막창 / 대창구이
+  if (t.includes('곱창') || t.includes('막창') || t.includes('대창')) {
+    return { icon: '🔥', bg: '#fee2e2', color: '#dc2626' };
   }
 
-  // 6. 찌개 / 김치찌개 / 된장찌개 / 부대찌개 / 순두부 / 감자탕
-  if (
-    target.includes('찌개') || target.includes('부대') || target.includes('순두부') ||
-    target.includes('감자탕') || target.includes('전골')
-  ) {
-    return pickFromPool(FOOD_POOLS.stew, seed);
+  // 6. 삼겹살 / 고깃집 / 구이 / 갈비
+  if (t.includes('삼겹살') || t.includes('갈비') || t.includes('고깃집') || t.includes('구이') || t.includes('고기') || t.includes('정육')) {
+    return { icon: '🥩', bg: '#fee2e2', color: '#b91c1c' };
   }
 
-  // 7. 떡볶이 / 즉석떡볶이 / 엽떡 / 두끼 / 신전
-  if (
-    target.includes('떡볶이') || target.includes('엽떡') || target.includes('청년다방') ||
-    target.includes('두끼') || target.includes('신전') || target.includes('즉석떡')
-  ) {
-    return pickFromPool(FOOD_POOLS.tteokbokki, seed);
+  // 7. 국밥 / 순대국 / 설렁탕 / 곰탕 / 해장국 / 뚝배기
+  if (t.includes('국밥') || t.includes('순대') || t.includes('설렁탕') || t.includes('곰탕') || t.includes('해장국') || t.includes('추어탕') || t.includes('도가니')) {
+    return { icon: '🍲', bg: '#fff7ed', color: '#ea580c' };
   }
 
-  // 8. 삼겹살 / 고깃집 / 불판구이 / 갈비 (먹으면돼지 등)
-  if (
-    target.includes('삼겹살') || target.includes('갈비') || target.includes('고깃집') ||
-    target.includes('구이') || target.includes('돼지') || target.includes('정육') ||
-    target.includes('숯불')
-  ) {
-    return pickFromPool(FOOD_POOLS.samgyeopsal, seed);
+  // 8. 찌개 / 전골 / 김치찌개 / 된장찌개 / 순두부 / 감자탕
+  if (t.includes('찌개') || t.includes('부대') || t.includes('순두부') || t.includes('감자탕') || t.includes('전골')) {
+    return { icon: '🥘', bg: '#fff1eb', color: '#ea580c' };
   }
 
-  // 9. 돈까스 / 일식 카레
-  if (
-    target.includes('돈까스') || target.includes('돈가츠') || target.includes('가츠') ||
-    target.includes('카레')
-  ) {
-    return pickFromPool(FOOD_POOLS.cutlet, seed);
+  // 9. 떡볶이 / 즉석떡볶이 / 엽떡 / 두끼 / 신전
+  if (t.includes('떡볶이') || t.includes('엽떡') || t.includes('청년다방') || t.includes('두끼') || t.includes('신전') || t.includes('즉석떡')) {
+    return { icon: '🍢', bg: '#ffe4e6', color: '#e11d48' };
   }
 
-  // 10. 초밥 / 스시 / 횟집 / 참치
-  if (
-    target.includes('초밥') || target.includes('스시') || target.includes('횟집') ||
-    target.includes('회') || target.includes('참치')
-  ) {
-    return pickFromPool(FOOD_POOLS.sushi, seed);
+  // 10. 돈까스 / 일식 카레
+  if (t.includes('돈까스') || t.includes('돈가츠') || t.includes('가츠') || t.includes('카레')) {
+    return { icon: '🍛', bg: '#fefce8', color: '#ca8a04' };
   }
 
-  // 11. 일식 라멘 / 우동 / 소바 / 면류
-  if (
-    target.includes('라멘') || target.includes('라면') || target.includes('우동') ||
-    target.includes('소바') || target.includes('국수') || target.includes('칼국수') ||
-    target.includes('냉면')
-  ) {
-    return pickFromPool(FOOD_POOLS.ramen, seed);
+  // 11. 초밥 / 스시 / 횟집 / 참치
+  if (t.includes('초밥') || t.includes('스시') || t.includes('횟집') || t.includes('회') || t.includes('참치')) {
+    return { icon: '🍣', bg: '#ecfeff', color: '#0891b2' };
   }
 
-  // 12. 중식 / 마라탕 / 짬뽕 / 짜장 / 탕수육
-  if (
-    target.includes('중식') || target.includes('마라') || target.includes('짬뽕') ||
-    target.includes('짜장') || target.includes('탕수육') || target.includes('양꼬치')
-  ) {
-    return pickFromPool(FOOD_POOLS.chinese, seed);
+  // 12. 라멘 / 우동 / 소바 / 칼국수 / 냉면 / 국수
+  if (t.includes('라멘') || t.includes('라면') || t.includes('우동') || t.includes('소바') || t.includes('국수') || t.includes('칼국수') || t.includes('냉면')) {
+    return { icon: '🍜', bg: '#fef3c7', color: '#d97706' };
   }
 
-  // 13. 토스트 / 김밥 / 샌드위치 / 도시락 / 한솥 / 만두
-  if (
-    target.includes('토스트') || target.includes('이삭') || target.includes('김밥') ||
-    target.includes('도시락') || target.includes('한솥') || target.includes('샌드위치') ||
-    target.includes('서브웨이') || target.includes('컵밥') || target.includes('만두')
-  ) {
-    return pickFromPool(FOOD_POOLS.snack, seed);
+  // 13. 중식 / 마라탕 / 짬뽕 / 짜장 / 탕수육
+  if (t.includes('중식') || t.includes('마라') || t.includes('짬뽕') || t.includes('짜장') || t.includes('탕수육') || t.includes('양꼬치')) {
+    return { icon: '🥢', bg: '#fef2f2', color: '#e11d48' };
   }
 
-  // 14. 패스트푸드 / 햄버거
-  if (
-    target.includes('버거') || target.includes('패스트푸드') || target.includes('맥도날드') ||
-    target.includes('롯데리아') || target.includes('버거킹') || target.includes('맘스터치') ||
-    target.includes('kfc')
-  ) {
-    return pickFromPool(FOOD_POOLS.burger, seed);
+  // 14. 햄버거 / 패스트푸드
+  if (t.includes('버거') || t.includes('패스트푸드') || t.includes('맥도날드') || t.includes('롯데리아') || t.includes('버거킹') || t.includes('맘스터치') || t.includes('kfc')) {
+    return { icon: '🍔', bg: '#fef2f2', color: '#dc2626' };
   }
 
-  // 15. 피자 / 파스타 / 양식 / 스테이크
-  if (
-    target.includes('피자') || target.includes('파스타') || target.includes('양식') ||
-    target.includes('스파게티') || target.includes('스테이크')
-  ) {
-    return pickFromPool(FOOD_POOLS.pizza, seed);
+  // 15. 토스트 / 김밥 / 샌드위치 / 도시락 / 한솥 / 만두
+  if (t.includes('토스트') || t.includes('이삭') || t.includes('김밥') || t.includes('도시락') || t.includes('한솥') || t.includes('샌드위치') || t.includes('서브웨이') || t.includes('컵밥') || t.includes('만두') || t.includes('분식')) {
+    return { icon: '🥪', bg: '#fef9c3', color: '#ca8a04' };
   }
 
-  // 16. 샐러드 / 포케 (실제 샐러드/포케 전문점만)
-  if (target.includes('샐러드') || target.includes('포케')) {
-    return pickFromPool(FOOD_POOLS.salad, seed);
+  // 16. 피자
+  if (t.includes('피자')) {
+    return { icon: '🍕', bg: '#fff7ed', color: '#ea580c' };
   }
 
-  // 17. 정통 한식 / 백반 / 밥집 / 식당 (부안식당 등) -> 푸짐한 한식 상차림!
-  if (
-    target.includes('한식') || target.includes('백반') || target.includes('식당') ||
-    target.includes('가정식') || target.includes('밥') || target.includes('음식점')
-  ) {
-    return pickFromPool(FOOD_POOLS.baekban, seed);
+  // 17. 파스타 / 양식 / 스테이크
+  if (t.includes('파스타') || t.includes('양식') || t.includes('스파게티') || t.includes('스테이크')) {
+    return { icon: '🍝', bg: '#faf5ff', color: '#9333ea' };
   }
 
-  // 18. 일반 육류/고기
-  if (target.includes('육류') || target.includes('고기')) {
-    return pickFromPool(FOOD_POOLS.samgyeopsal, seed);
+  // 18. 샐러드 / 포케
+  if (t.includes('샐러드') || t.includes('포케')) {
+    return { icon: '🥗', bg: '#ecfdf5', color: '#059669' };
   }
 
-  return pickFromPool(FOOD_POOLS.default, seed);
+  // 19. 카페 / 디저트 / 베이커리
+  if (t.includes('카페') || t.includes('디저트') || t.includes('베이커리') || t.includes('커피')) {
+    return { icon: '☕', bg: '#f5f3ff', color: '#6d28d9' };
+  }
+
+  // 20. 술집 / 주점 / 호프 / 포차
+  if (t.includes('술집') || t.includes('주점') || t.includes('호프') || t.includes('포차') || t.includes('이자카야')) {
+    return { icon: '🍺', bg: '#fef9c3', color: '#854d0e' };
+  }
+
+  // 21. 한식 / 백반 / 밥집 / 가정식 (부안식당 등)
+  if (t.includes('한식') || t.includes('백반') || t.includes('식당') || t.includes('가정식') || t.includes('밥')) {
+    return { icon: '🍱', bg: '#f0fdf4', color: '#16a34a' };
+  }
+
+  return { icon: '🍴', bg: '#f1f5f9', color: '#475569' };
 }
 
 // 현실 식당 및 메뉴 특성을 정밀 반영한 대중적 혼밥 난이도 5단계 알고리즘
@@ -281,8 +138,8 @@ function evaluateSoloIndex(category = '', name = '') {
       lv: 5,
       label: 'Lv.5 혼밥 끝판왕',
       pillClass: 'lv-5',
-      psychology: '불판 구이 & 술자리 회식 분위기 · 진정한 마스터 용자',
-      tags: ['#최소2인주문', '#불판구이', '#술자리회식분위기', '#혼밥끝판왕', '#용자만도전'],
+      psychology: '불판 구이 & 술자리 회식 분위기 · 최고난도 혼밥 도전',
+      tags: ['#최소2인주문', '#불판구이', '#술자리회식분위기', '#혼밥끝판왕', '#최고난도도전'],
     };
   }
 
@@ -299,8 +156,8 @@ function evaluateSoloIndex(category = '', name = '') {
       lv: 4,
       label: 'Lv.4 다인석 식당',
       pillClass: 'lv-4',
-      psychology: '2인 이상 냄비 or 데이트·모임 위주 · 살짝 눈치/용기 필요',
-      tags: ['#2인이상냄비', '#떡볶이전문점', '#데이트손님위주', '#혼자오셨어요?', '#포장추천'],
+      psychology: '2인 이상 냄비 or 데이트·모임 위주 · 혼밥 도전 코스',
+      tags: ['#2인이상냄비', '#떡볶이전문점', '#데이트손님위주', '#혼밥도전코스', '#포장추천'],
     };
   }
 
@@ -594,21 +451,25 @@ function renderFilteredPlaces() {
   placesContainer.innerHTML = filtered.map((place) => createCardHtml(place)).join('');
 }
 
-// 개별 식당 카드 HTML 생성
+// 개별 식당 카드 HTML 생성 (토스/당근마켓 스타일 모던 클린 카드 UI)
 function createCardHtml(place) {
   const soloInfo = getDynamicSoloIndex(place);
-  const photoUrl = getCategoryPhoto(place.category_name, place.place_name, place.id);
+  const catIcon = getCategoryEmoji(place.category_name, place.place_name);
   const walkText = formatDistanceWalking(place.distance);
   const cleanAddr = place.road_address_name || place.address_name || '주소 정보 없음';
   const cleanPhone = place.phone || '전화번호 미등록';
   const isFav = isPlaceFavorite(place.id);
   const reviews = getPlaceReviews(place.id);
 
+  // 카카오맵 및 네이버 지도 링크 (양대 플랫폼 듀얼 연동)
+  const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
+  const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
+
   const reviewPreviewHtml = reviews.length > 0
     ? `
       <div class="card-review-box">
         <div class="review-box-header">
-          <span class="review-box-tag">💬 학우 최신 팁</span>
+          <span class="review-box-tag">💬 학우 실시간 팁</span>
           <span class="review-box-count">${reviews.length}개 리뷰</span>
         </div>
         <p class="review-box-text">"${escapeHtml(reviews[0].text)}"</p>
@@ -625,12 +486,19 @@ function createCardHtml(place) {
     `;
 
   return `
-    <article class="place-card-item" id="place-card-${place.id}">
-      <!-- 썸네일 영역 -->
-      <div class="card-media">
-        <img src="${photoUrl}" alt="${escapeHtml(place.place_name)}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80';" />
-        
-        <!-- 하트 찜 버튼 -->
+    <article class="place-card-item clean-card" id="place-card-${place.id}">
+      <!-- 카드 헤더 영역 (3D 카테고리 아이콘 + 타이틀 + 찜 버튼) -->
+      <div class="card-header-row">
+        <div class="card-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};" title="${escapeHtml(place.category_name || '식당')}">
+          <span class="icon-emoji">${catIcon.icon}</span>
+        </div>
+        <div class="card-title-group">
+          <div class="card-cat-line">
+            <span class="place-category">${escapeHtml(place.category_name || '일반음식점')}</span>
+            <span class="distance-pill">${walkText}</span>
+          </div>
+          <h3 class="place-title">${escapeHtml(place.place_name)}</h3>
+        </div>
         <button 
           type="button" 
           class="btn-heart-fav ${isFav ? 'active' : ''}" 
@@ -639,51 +507,47 @@ function createCardHtml(place) {
         >
           ${isFav ? '❤️' : '🤍'}
         </button>
-
-        <div class="media-badges">
-          <span class="difficulty-pill index-level ${soloInfo.pillClass}">
-            ${soloInfo.label}
-          </span>
-          <span class="distance-pill">
-            ${walkText}
-          </span>
-        </div>
       </div>
 
-      <!-- 카드 본문 -->
-      <div class="card-body">
-        <span class="place-category">${escapeHtml(place.category_name || '일반음식점')}</span>
-        <h3 class="place-title">${escapeHtml(place.place_name)}</h3>
+      <!-- 혼밥 난이도 배너 및 심리 안내 -->
+      <div class="card-solo-banner ${soloInfo.pillClass}">
+        <div class="solo-badge-chip">${soloInfo.label}</div>
+        <div class="solo-psychology-text">${soloInfo.psychology}</div>
+      </div>
 
-        <!-- 혼밥 포인트 태그 -->
-        <div class="solo-tags">
-          ${soloInfo.tags.map((t) => `<span class="solo-tag">${t}</span>`).join('')}
-        </div>
+      <!-- 혼밥 특징 태그 -->
+      <div class="solo-tags">
+        ${soloInfo.tags.map((t) => `<span class="solo-tag">${t}</span>`).join('')}
+      </div>
 
-        <!-- 실시간 학우 혼밥 팁 박스 -->
-        ${reviewPreviewHtml}
+      <!-- 실시간 학우 혼밥 팁 박스 -->
+      ${reviewPreviewHtml}
 
-        <!-- 주소 및 연락처 정보 -->
-        <ul class="place-meta-list">
-          <li>
-            <span class="meta-icon">📍</span>
-            <span>${escapeHtml(cleanAddr)}</span>
-          </li>
-          <li>
-            <span class="meta-icon">📞</span>
-            <span>${escapeHtml(cleanPhone)}</span>
-          </li>
-        </ul>
+      <!-- 주소 및 연락처 정보 -->
+      <ul class="place-meta-list">
+        <li>
+          <span class="meta-icon">📍</span>
+          <span>${escapeHtml(cleanAddr)}</span>
+        </li>
+        <li>
+          <span class="meta-icon">📞</span>
+          <span>${escapeHtml(cleanPhone)}</span>
+        </li>
+      </ul>
 
-        <!-- 하단 액션 버튼 -->
-        <div class="card-footer-actions">
-          <a href="${escapeHtml(place.place_url)}" target="_blank" rel="noopener noreferrer" class="btn-map-link">
-            카카오맵
+      <!-- 하단 액션 버튼 (카카오맵 + 네이버 지도 듀얼 연동 & 리뷰 작성) -->
+      <div class="card-footer-actions dual-map-actions">
+        <div class="map-links-group">
+          <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-map-link kakao" title="카카오맵에서 위치 및 길찾기 보기">
+            <span>🟡</span> 카카오맵
           </a>
-          <button type="button" class="btn-open-review" onclick="openReviewModalById('${place.id}')">
-            혼밥 리뷰 작성
-          </button>
+          <a href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer" class="btn-map-link naver" title="네이버 지도에서 방문자 영수증 리뷰 및 메뉴 사진 보기">
+            <span>🟢</span> 네이버 지도
+          </a>
         </div>
+        <button type="button" class="btn-open-review" onclick="openReviewModalById('${place.id}')">
+          ✏️ 리뷰 작성
+        </button>
       </div>
     </article>
   `;
@@ -803,21 +667,22 @@ function spinRoulette() {
     currentWinningPlace = winner;
 
     const soloInfo = getDynamicSoloIndex(winner);
-    const photo = getCategoryPhoto(winner.category_name, winner.place_name);
+    const catIcon = getCategoryEmoji(winner.category_name, winner.place_name);
     const walk = formatDistanceWalking(winner.distance);
 
     rouletteCardSlot.classList.add('is-winner');
     rouletteCardSlot.innerHTML = `
-      <div class="roulette-winner-card">
-        <div class="winner-img-wrap">
-          <img src="${photo}" alt="${escapeHtml(winner.place_name)}" />
-          <div class="winner-badges">
-            <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
-            <span class="distance-pill">${walk}</span>
-          </div>
+      <div class="roulette-winner-card clean-winner">
+        <div class="winner-icon-wrap" style="background: ${catIcon.bg}; color: ${catIcon.color};">
+          <span class="winner-emoji">${catIcon.icon}</span>
+        </div>
+        <div class="winner-badges">
+          <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
+          <span class="distance-pill">${walk}</span>
         </div>
         <h4 class="winner-title">${escapeHtml(winner.place_name)}</h4>
         <span class="winner-category">${escapeHtml(winner.category_name || '식당')}</span>
+        <p class="winner-psychology">${soloInfo.psychology}</p>
         <p class="winner-meta">📍 ${escapeHtml(winner.road_address_name || winner.address_name || '명지대 근처')}</p>
       </div>
     `;
@@ -912,10 +777,11 @@ function initLeafletMap() {
     zoomControl: true,
   });
 
-  // 오픈소스 & 워터마크 없는 OpenStreetMap 표준 고화질 타일
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  // 고해상도 & 모던 파스텔 타일 (CartoDB Voyager: 국내외 최고 수준의 화사하고 세련된 벡터형 타일)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    subdomains: 'abcd',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
   }).addTo(leafletMap);
 
   // 명지대학교 인문캠퍼스 대표 마커
@@ -955,8 +821,10 @@ function updateMapMarkers() {
     if (isNaN(lat) || isNaN(lng)) return;
 
     const soloInfo = getDynamicSoloIndex(place);
-    const photo = getCategoryPhoto(place.category_name, place.place_name, place.id);
+    const catIcon = getCategoryEmoji(place.category_name, place.place_name);
     const walk = formatDistanceWalking(place.distance);
+    const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
+    const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
 
     const pinIcon = L.divIcon({
       className: 'custom-div-icon',
@@ -967,23 +835,31 @@ function updateMapMarkers() {
     });
 
     const popupHtml = `
-      <div class="map-popup-card">
-        <div class="popup-img-wrap">
-          <img src="${photo}" alt="${escapeHtml(place.place_name)}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80';" />
-          <div class="media-badges">
-            <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
-            <span class="distance-pill">${walk}</span>
+      <div class="map-popup-card clean-popup">
+        <div class="popup-header-row">
+          <div class="popup-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};">
+            <span>${catIcon.icon}</span>
+          </div>
+          <div class="popup-title-box">
+            <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
+            <div class="popup-badges-row">
+              <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
+              <span class="distance-pill">${walk}</span>
+            </div>
           </div>
         </div>
         <div class="popup-body">
-          <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
+          <p class="popup-psychology">${soloInfo.psychology}</p>
           <p class="popup-meta">📍 ${escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음')}</p>
           <div class="popup-footer-actions">
-            <a href="${escapeHtml(place.place_url)}" target="_blank" rel="noopener noreferrer" class="popup-btn primary">
-              길찾기
+            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn kakao" title="카카오맵 길찾기">
+              🟡 카카오맵
+            </a>
+            <a href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn naver" title="네이버 지도 리뷰">
+              🟢 네이버 지도
             </a>
             <button type="button" class="popup-btn secondary" onclick="openReviewModalById('${place.id}')">
-              리뷰 작성
+              ✏️ 리뷰 작성
             </button>
           </div>
         </div>

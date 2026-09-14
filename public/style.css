@@ -323,42 +323,49 @@ body {
   80% { transform: rotate(10deg) scale(1.05); }
 }
 
-/* 퀵 키워드 칩 */
+/* 퀵 키워드 칩 (한 줄로 깔끔하게 쏙 들어가도록 컴팩트 & 조화로운 정렬) */
 .quick-keywords {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .kw-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
   color: var(--text-muted);
+  margin-right: 2px;
 }
 
 .kw-chip {
-  background: #f1f5f9;
+  background: #f8fafc;
   border: 1px solid var(--border-light);
   color: var(--text-body);
-  padding: 6px 14px;
+  padding: 5px 11px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .kw-chip:hover {
   background: #e2e8f0;
   color: var(--text-main);
+  transform: translateY(-1px);
 }
 
 .kw-chip.active {
   background: var(--primary-light);
   color: var(--primary);
-  border-color: rgba(255, 82, 38, 0.3);
+  border-color: rgba(255, 82, 38, 0.4);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255, 82, 38, 0.15);
 }
 
 /* 난이도 기준 카드 5종 */
@@ -714,12 +721,13 @@ body {
 .pin-bubble.lv-4 { background: var(--lv4-color); }
 .pin-bubble.lv-5 { background: var(--lv5-color); }
 
-/* Leaflet 팝업 스타일 */
+/* Leaflet 팝업 스타일 (모던 클린 팝업) */
 .leaflet-popup-content-wrapper {
-  border-radius: 18px !important;
+  border-radius: 20px !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
 }
 
 .leaflet-popup-content {
@@ -728,26 +736,39 @@ body {
 }
 
 .map-popup-card {
-  width: 250px;
+  width: 270px;
   background: #ffffff;
   overflow: hidden;
+  padding: 16px;
 }
 
-.popup-img-wrap {
-  width: 100%;
-  height: 110px;
-  background: #f1f5f9;
-  position: relative;
+.map-popup-card.clean-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.popup-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.popup-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.popup-body {
-  padding: 12px 14px 14px;
+.popup-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.popup-title-box {
+  flex: 1;
+  min-width: 0;
 }
 
 .popup-title {
@@ -755,39 +776,104 @@ body {
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popup-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.popup-badges-row .difficulty-pill {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.popup-badges-row .distance-pill {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.popup-psychology {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(255, 82, 38, 0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 0;
+  word-break: keep-all;
 }
 
 .popup-meta {
   font-size: 11.5px;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin: 0;
+  line-height: 1.35;
 }
 
 .popup-footer-actions {
   display: flex;
   gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
 }
 
 .popup-btn {
   flex: 1;
   text-align: center;
-  padding: 7px 10px;
+  padding: 6px 8px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
 }
 
-.popup-btn.primary {
-  background: var(--primary);
+.popup-btn.kakao {
+  background: #fee500;
+  color: #3c1e1e;
+  border-color: #fada0a;
+}
+
+.popup-btn.kakao:hover {
+  background: #fdd835;
+}
+
+.popup-btn.naver {
+  background: #03c75a;
   color: #ffffff;
+  border-color: #02b150;
+}
+
+.popup-btn.naver:hover {
+  background: #02b150;
 }
 
 .popup-btn.secondary {
   background: #f1f5f9;
   color: var(--text-main);
+  border-color: #e2e8f0;
+}
+
+.popup-btn.secondary:hover {
+  background: #e2e8f0;
 }
 
 /* 카드 내 하트 찜 버튼 */
@@ -1032,6 +1118,10 @@ body {
   font-size: 13px;
   font-weight: 700;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .btn-map-link:hover {
@@ -1050,6 +1140,10 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .btn-open-review:hover {
@@ -1058,6 +1152,218 @@ body {
 
 .btn-open-review:active {
   transform: scale(0.98);
+}
+
+/* ===================================================
+   🍱 모던 클린 카드 UI (토스/당근마켓 스타일 3D 이모지 카드)
+   =================================================== */
+.place-card-item.clean-card {
+  padding: 24px;
+  background: #ffffff;
+  border: 1.5px solid #eef2f6;
+  border-radius: 22px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.place-card-item.clean-card:hover {
+  transform: translateY(-5px);
+  border-color: #cbd5e1;
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.1);
+}
+
+/* 카드 상단 헤더 행 */
+.card-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+  margin-bottom: 14px;
+}
+
+/* 3D 카테고리 아이콘 뱃지 */
+.card-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* 타이틀 & 카테고리 그룹 */
+.card-title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-cat-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.card-cat-line .place-category {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-cat-line .distance-pill {
+  font-size: 11px;
+  font-weight: 800;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.clean-card .place-title {
+  font-size: 18.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin-bottom: 0;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+}
+
+/* 클린 카드 내 찜 버튼 위치 조정 */
+.clean-card .btn-heart-fav {
+  position: static;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  box-shadow: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 16px;
+}
+
+.clean-card .btn-heart-fav:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+/* 혼밥 난이도 배너 & 심리 문구 */
+.card-solo-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.card-solo-banner.lv-1 { background: #ecfdf5; }
+.card-solo-banner.lv-2 { background: #eff6ff; }
+.card-solo-banner.lv-3 { background: #fefce8; }
+.card-solo-banner.lv-4 { background: #faf5ff; }
+.card-solo-banner.lv-5 { background: #fef2f2; }
+
+.solo-badge-chip {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.card-solo-banner.lv-1 .solo-badge-chip { background: var(--lv1-color); color: #fff; }
+.card-solo-banner.lv-2 .solo-badge-chip { background: var(--lv2-color); color: #fff; }
+.card-solo-banner.lv-3 .solo-badge-chip { background: var(--lv3-color); color: #fff; }
+.card-solo-banner.lv-4 .solo-badge-chip { background: var(--lv4-color); color: #fff; }
+.card-solo-banner.lv-5 .solo-badge-chip { background: var(--lv5-color); color: #fff; }
+
+.solo-psychology-text {
+  font-size: 12px;
+  font-weight: 700;
+  word-break: keep-all;
+}
+
+.card-solo-banner.lv-1 .solo-psychology-text { color: #047857; }
+.card-solo-banner.lv-2 .solo-psychology-text { color: #1d4ed8; }
+.card-solo-banner.lv-3 .solo-psychology-text { color: #a16207; }
+.card-solo-banner.lv-4 .solo-psychology-text { color: #7e22ce; }
+.card-solo-banner.lv-5 .solo-psychology-text { color: #b91c1c; }
+
+/* 듀얼 지도 액션 버튼 (카카오맵 + 네이버 지도) */
+.dual-map-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.map-links-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-map-link.kakao {
+  background: #fee500;
+  color: #3c1e1e;
+  border: 1px solid #fada0a;
+}
+
+.btn-map-link.kakao:hover {
+  background: #fdd835;
+  border-color: #fbc02d;
+}
+
+.btn-map-link.naver {
+  background: #03c75a;
+  color: #ffffff;
+  border: 1px solid #02b150;
+}
+
+.btn-map-link.naver:hover {
+  background: #02b150;
+  border-color: #029443;
+}
+
+/* 룰렛 위너 클린 카드 */
+.roulette-winner-card.clean-winner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.winner-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.winner-psychology {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(255, 82, 38, 0.08);
+  padding: 5px 12px;
+  border-radius: 8px;
+  margin: 8px 0;
 }
 
 /* 모달 레이아웃 (화이트 & 클린) */
