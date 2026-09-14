@@ -55,11 +55,12 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
       });
     }
 
-    // 2. 카카오 로컬 API 3대 거점 (인문캠, 명지전문대, 백련시장) 실시간 검색 병렬 수행
+    // 2. 카카오 로컬 API 3대 거점 (인문캠, 명지전문대, 백련시장) 도보 상권(800m) 실시간 검색 병렬 수행
+    // 반경을 800m로 정밀 타겟팅하여 증산동, 불광천, 수색 등 먼 외곽 상권이 섞이지 않도록 방지!
     const hubs = [
-      { name: '명지대 인문캠', x: MYONGJI_SEOUL_COORDS.x, y: MYONGJI_SEOUL_COORDS.y, radius: 1500 },
-      { name: '명지전문대', x: '126.9240', y: '37.5845', radius: 1500 },
-      { name: '백련시장', x: '126.9231', y: '37.5768', radius: 1500 },
+      { name: '명지대 인문캠', x: MYONGJI_SEOUL_COORDS.x, y: MYONGJI_SEOUL_COORDS.y, radius: 800 },
+      { name: '명지전문대', x: '126.9240', y: '37.5845', radius: 800 },
+      { name: '백련시장', x: '126.9231', y: '37.5768', radius: 800 },
     ];
 
     const kakaoSearchTerm = isGeneralQuery ? '명지대 맛집' : `${query} 명지대`;
@@ -81,12 +82,25 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
     const results = await Promise.all(searchPromises);
 
     // 3. 대동명지도 식당을 최우선으로 리스트에 담고, 카카오 실시간 검색 결과를 중복 없이 병합
-    const combinedPlaces: KakaoPlaceDocument[] = [...matchedDaedong];
+    // 🎯 명지대 실제 도보 상권 (남가좌동, 명지전문대 가좌로, 백련시장 증가로) 엄격 필터링!
+    const isInsideWalkingZone = (p: KakaoPlaceDocument) => {
+      const lat = Number(p.y);
+      const lng = Number(p.x);
+      const addr = (p.road_address_name || p.address_name || '').toLowerCase();
+      // 증산, 은평구, 수색 등 원거리 상권 제외
+      if (addr.includes('증산') || addr.includes('은평구') || addr.includes('수색')) {
+        return false;
+      }
+      return lat >= 37.573 && lat <= 37.588 && lng >= 126.917 && lng <= 126.933;
+    };
+
+    const combinedPlaces: KakaoPlaceDocument[] = matchedDaedong.filter(isInsideWalkingZone);
     const existingIds = new Set<string>(combinedPlaces.map((p) => p.id));
     const existingNames = new Set<string>(combinedPlaces.map((p) => p.place_name.replace(/\s+/g, '')));
 
     for (const resData of results) {
       for (const place of resData.documents) {
+        if (!isInsideWalkingZone(place)) continue;
         const normName = place.place_name.replace(/\s+/g, '');
         if (!existingIds.has(place.id) && !existingNames.has(normName)) {
           existingIds.add(place.id);

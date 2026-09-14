@@ -60,21 +60,6 @@
     "source": "daedong"
   },
   {
-    "id": "690959548",
-    "place_name": "한솥도시락 가재울뉴타운점",
-    "category_name": "음식점 > 도시락 > 한솥도시락",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "02-304-1585",
-    "address_name": "서울 서대문구 북가좌동 481",
-    "road_address_name": "서울 서대문구 수색로 100",
-    "x": "126.91010624660568",
-    "y": "37.57724795406051",
-    "place_url": "http://place.map.kakao.com/690959548",
-    "distance": "1219",
-    "source": "daedong"
-  },
-  {
     "id": "21132317",
     "place_name": "투데이하우스",
     "category_name": "음식점 > 한식",
@@ -165,21 +150,6 @@
     "source": "daedong"
   },
   {
-    "id": "13331115",
-    "place_name": "민스키친 연희점",
-    "category_name": "음식점 > 퓨전요리 > 퓨전한식",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "02-324-5511",
-    "address_name": "서울 서대문구 연희동 189-11",
-    "road_address_name": "서울 서대문구 연희맛로 7",
-    "x": "126.928681423467",
-    "y": "37.5662657959693",
-    "place_url": "http://place.map.kakao.com/13331115",
-    "distance": "1615",
-    "source": "daedong"
-  },
-  {
     "id": "286570900",
     "place_name": "마닐로우",
     "category_name": "음식점 > 한식",
@@ -207,21 +177,6 @@
     "y": "37.5792516250279",
     "place_url": "http://place.map.kakao.com/14631333",
     "distance": "118",
-    "source": "daedong"
-  },
-  {
-    "id": "953982163",
-    "place_name": "호우동 3호점",
-    "category_name": "음식점 > 일식 > 돈까스,우동",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "02-353-3060",
-    "address_name": "서울 은평구 역촌동 41-52",
-    "road_address_name": "서울 은평구 진흥로 51",
-    "x": "126.920276610274",
-    "y": "37.6017487338503",
-    "place_url": "http://place.map.kakao.com/953982163",
-    "distance": "2407",
     "source": "daedong"
   },
   {
@@ -1065,21 +1020,6 @@
     "source": "daedong"
   },
   {
-    "id": "12708748",
-    "place_name": "이삭토스트 증산역점",
-    "category_name": "음식점 > 간식 > 토스트 > 이삭토스트",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "02-307-5488",
-    "address_name": "서울 서대문구 북가좌동 342-8",
-    "road_address_name": "서울 서대문구 증가로 260",
-    "x": "126.91150158748957",
-    "y": "37.58388140189022",
-    "place_url": "http://place.map.kakao.com/12708748",
-    "distance": "1127",
-    "source": "daedong"
-  },
-  {
     "id": "24768606",
     "place_name": "맘스터치 명지대점",
     "category_name": "음식점 > 패스트푸드 > 맘스터치",
@@ -1335,21 +1275,6 @@
     "source": "daedong"
   },
   {
-    "id": "14703587",
-    "place_name": "치킨시대 증산점",
-    "category_name": "음식점 > 치킨",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "02-309-8883",
-    "address_name": "서울 은평구 증산동 167-1",
-    "road_address_name": "서울 은평구 증산로9길 13",
-    "x": "126.908908793845",
-    "y": "37.5853893134185",
-    "place_url": "http://place.map.kakao.com/14703587",
-    "distance": "1403",
-    "source": "daedong"
-  },
-  {
     "id": "16296083",
     "place_name": "신돈갈비",
     "category_name": "음식점 > 한식 > 육류,고기 > 갈비",
@@ -1602,21 +1527,6 @@
     "y": "37.5824428472659",
     "place_url": "http://place.map.kakao.com/1372871526",
     "distance": "252",
-    "source": "daedong"
-  },
-  {
-    "id": "1647059001",
-    "place_name": "인생건어물맥주 연희점",
-    "category_name": "음식점 > 술집 > 호프,요리주점 > 인생건어물맥주",
-    "category_group_code": "FD6",
-    "category_group_name": "음식점",
-    "phone": "070-8211-0604",
-    "address_name": "서울 서대문구 연희동 132-41",
-    "road_address_name": "서울 서대문구 연희맛로 29",
-    "x": "126.93023414079194",
-    "y": "37.56774255468684",
-    "place_url": "http://place.map.kakao.com/1647059001",
-    "distance": "1508",
     "source": "daedong"
   },
   {
