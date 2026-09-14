@@ -806,6 +806,9 @@ function initLeafletMap() {
 }
 
 function updateMapMarkers() {
+  if (currentMapEngine === 'naver' && naverMap) {
+    updateNaverMapMarkers();
+  }
   if (!leafletMap) return;
 
   // 기존 식당 마커 정리
@@ -893,16 +896,24 @@ let naverInfoWindows = [];
 let currentMapEngine = 'leaflet'; // 'leaflet' | 'naver'
 let naverClientId = localStorage.getItem('solo_map_naver_client_id') || '';
 
-// 서버 환경변수(NAVER_CLIENT_ID) 확인
+// 서버 환경변수(NAVER_CLIENT_ID) 확인 및 자동 네이버 지도 모드 활성화
 fetch('/api/config')
   .then((res) => res.json())
-  .then((cfg) => {
+  .then(async (cfg) => {
     if (cfg && cfg.naverClientId) {
       naverClientId = cfg.naverClientId;
       localStorage.setItem('solo_map_naver_client_id', cfg.naverClientId);
     }
     if (naverClientId) {
-      loadNaverMapSdk(naverClientId);
+      const ok = await loadNaverMapSdk(naverClientId);
+      if (ok) {
+        currentMapEngine = 'naver';
+        const toggleBtn = document.getElementById('btn-toggle-naver-map');
+        if (toggleBtn) {
+          toggleBtn.classList.add('active');
+          toggleBtn.innerHTML = '🌐 기본 지도로 전환';
+        }
+      }
     }
   })
   .catch(() => {});
@@ -916,7 +927,8 @@ function loadNaverMapSdk(clientId) {
     const script = document.createElement('script');
     script.id = 'naver-maps-sdk-script';
     script.type = 'text/javascript';
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}`;
+    // ncpClientId와 ncpKeyId 둘 다 호환되도록 전달
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}&ncpClientId=${encodeURIComponent(clientId)}`;
     script.onload = () => {
       console.log('🟢 네이버 지도 v3 SDK 로드 성공!');
       resolve(true);
@@ -1131,7 +1143,9 @@ function escapeHtml(str) {
 const btnMapCenterMju = document.getElementById('btn-map-center-mju');
 if (btnMapCenterMju) {
   btnMapCenterMju.addEventListener('click', () => {
-    if (leafletMap) {
+    if (currentMapEngine === 'naver' && naverMap && window.naver && window.naver.maps) {
+      naverMap.morph(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng), 16);
+    } else if (leafletMap) {
       leafletMap.flyTo([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], 16, { duration: 0.6 });
     }
   });
@@ -1140,7 +1154,11 @@ if (btnMapCenterMju) {
 const btnMapFitBounds = document.getElementById('btn-map-fit-bounds');
 if (btnMapFitBounds) {
   btnMapFitBounds.addEventListener('click', () => {
-    fitMapBounds();
+    if (currentMapEngine === 'naver' && naverMap && window.naver && window.naver.maps) {
+      fitNaverMapBounds();
+    } else {
+      fitMapBounds();
+    }
   });
 }
 
