@@ -178,19 +178,27 @@
 
       <!-- 2) 인터랙티브 네이버 순정 지도 뷰 (기본 숨김) -->
       <div id="map-view-container" class="map-view-container hidden">
-        <!-- 지도 플로팅 컨트롤 바 (명지대 중심, 전체 식당 맞춤) -->
+        <!-- 지도 플로팅 컨트롤 바 (명지대, 명지전문대, 백련시장, 전체 권역 맞춤) -->
         <div class="map-floating-controls">
-          <button type="button" id="btn-map-center-mju" class="map-ctrl-btn" title="명지대학교 캠퍼스 중심으로 화면 이동">
-            📍 명지대 중심
+          <button type="button" id="btn-map-center-mju" class="map-ctrl-btn" title="명지대학교 인문캠퍼스 중심으로 이동">
+            📍 명지대
           </button>
-          <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn" title="현재 검색된 모든 식당을 한 화면에 맞춤">
-            🎯 전체 식당 맞춤
+          <button type="button" id="btn-map-center-mjc" class="map-ctrl-btn" title="명지전문대학 방면으로 이동">
+            🏫 명지전문대
+          </button>
+          <button type="button" id="btn-map-center-bn" class="map-ctrl-btn" title="백련시장 맛집 골목 방면으로 이동">
+            🛒 백련시장
+          </button>
+          <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn active-fit" title="명지대 · 명지전문대 · 백련시장 전체 식당을 한 화면에 맞춤">
+            🎯 전체 권역 맞춤
           </button>
         </div>
         <div id="naver-map-canvas" class="naver-map-element"></div>
         <div id="leaflet-map" class="leaflet-map-element hidden"></div>
         <div class="map-legend">
-          <span class="legend-item"><span class="legend-dot mju">🏛️</span> 명지대 인문캠</span>
+          <span class="legend-item"><span class="legend-dot mju">🏛️</span> 명지대</span>
+          <span class="legend-item"><span class="legend-dot mjc">🏫</span> 명지전문대</span>
+          <span class="legend-item"><span class="legend-dot bn">🛒</span> 백련시장</span>
           <span class="legend-item"><span class="legend-dot lv1"></span> Lv.1 입문</span>
           <span class="legend-item"><span class="legend-dot lv2"></span> Lv.2 성지</span>
           <span class="legend-item"><span class="legend-dot lv3"></span> Lv.3 일반</span>

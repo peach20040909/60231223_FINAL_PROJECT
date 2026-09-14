@@ -748,6 +748,35 @@ body {
   box-shadow: 0 4px 16px rgba(0, 44, 95, 0.45);
 }
 
+.pin-bubble.mjc-pin {
+  background: #1d4ed8 !important;
+  width: 36px;
+  height: 36px;
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.45);
+}
+
+.pin-bubble.bn-pin {
+  background: #d97706 !important;
+  width: 36px;
+  height: 36px;
+  border-color: #fde68a;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.45);
+}
+
+.map-ctrl-btn.active-fit {
+  background: #ff5226;
+  color: #ffffff;
+  border-color: #ff5226;
+  box-shadow: 0 4px 16px rgba(255, 82, 38, 0.3);
+}
+
+.map-ctrl-btn.active-fit:hover {
+  background: #e03e15;
+  color: #ffffff;
+  border-color: #e03e15;
+}
+
 .pin-bubble.lv-1 { background: var(--lv1-color); }
 .pin-bubble.lv-2 { background: var(--lv2-color); }
 .pin-bubble.lv-3 { background: var(--lv3-color); }

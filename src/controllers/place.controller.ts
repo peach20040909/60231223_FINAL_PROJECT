@@ -5,7 +5,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import { searchPlacesByKeyword, MYONGJI_SEOUL_COORDS } from '../lib/kakao.js';
+import { searchPlacesByKeyword, MYONGJI_SEOUL_COORDS, type KakaoPlaceDocument } from '../lib/kakao.js';
 
 // 식당 키워드 검색 컨트롤러 (카카오 로컬 API 연동)
 export async function searchPlaces(req: Request, res: Response, next: NextFunction) {
@@ -22,20 +22,52 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    // 명지대학교 인문캠퍼스(서울 서대문구 거북골로) 기준 반경 1.5km(1500m) 내 검색
-    const searchResult = await searchPlacesByKeyword(query, {
-      page,
-      size,
-      x: MYONGJI_SEOUL_COORDS.x,
-      y: MYONGJI_SEOUL_COORDS.y,
-      radius: 1500,
-      sort: 'distance',
-    });
+    // 명지대 대학가 3대 핵심 생활 거점 (인문캠퍼스, 명지전문대, 백련시장)
+    // 단일 좌표 거리순의 국소 뭉침(정문 앞 100m만 나오는 현상)을 해결하고
+    // 명지전문대 북측 상권과 백련시장 남측 골목까지 대학가 전체를 풍성하게 커버!
+    const hubs = [
+      { name: '명지대 인문캠', x: MYONGJI_SEOUL_COORDS.x, y: MYONGJI_SEOUL_COORDS.y, radius: 1500 },
+      { name: '명지전문대', x: '126.9240', y: '37.5845', radius: 1500 },
+      { name: '백련시장', x: '126.9231', y: '37.5768', radius: 1500 },
+    ];
+
+    const searchPromises = hubs.map((hub) =>
+      searchPlacesByKeyword(query, {
+        page: 1,
+        size: 15,
+        x: hub.x,
+        y: hub.y,
+        radius: hub.radius,
+        sort: 'distance',
+      }).catch(() => ({
+        meta: { total_count: 0, pageable_count: 0, is_end: true },
+        documents: [] as KakaoPlaceDocument[],
+      }))
+    );
+
+    const results = await Promise.all(searchPromises);
+
+    // 중복 제거 및 리스트 병합
+    const combinedPlaces: KakaoPlaceDocument[] = [];
+    const existingIds = new Set<string>();
+
+    for (const resData of results) {
+      for (const place of resData.documents) {
+        if (!existingIds.has(place.id)) {
+          existingIds.add(place.id);
+          combinedPlaces.push(place);
+        }
+      }
+    }
 
     res.json({
       success: true,
-      meta: searchResult.meta,
-      places: searchResult.documents,
+      meta: {
+        total_count: combinedPlaces.length,
+        pageable_count: combinedPlaces.length,
+        is_end: true,
+      },
+      places: combinedPlaces,
     });
   } catch (error) {
     // 에러 발생 시 Express 전역 에러 핸들러로 전달

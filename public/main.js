@@ -379,15 +379,15 @@ async function loadPlaces(keyword) {
   placesContainer.innerHTML = `
     <div style="grid-column: 1 / -1; text-align: center; padding: 70px 0; color: #64748b;">
       <p style="font-size: 32px; margin-bottom: 12px; animation: pulse 1s infinite;">🔍</p>
-      <p style="font-size: 16px; font-weight: 700; color: #0f172a;">명지대 인문캠퍼스 반경 1.5km 내 식당 탐색 중...</p>
-      <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">카카오 로컬 실시간 API 연동</p>
+      <p style="font-size: 16px; font-weight: 700; color: #0f172a;">명지대 · 명지전문대 · 백련시장 대학가 상권 탐색 중...</p>
+      <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">카카오 로컬 & 네이버 지도 실시간 연동</p>
     </div>
   `;
   catalogTitle.textContent = `"${keyword}" 검색 결과`;
   catalogCount.textContent = '검색 중...';
 
   try {
-    const res = await fetch(`/api/places/search?query=${encodeURIComponent(keyword)}&size=15`);
+    const res = await fetch(`/api/places/search?query=${encodeURIComponent(keyword)}`);
     const data = await res.json();
 
     if (!data.success) {
@@ -746,9 +746,11 @@ btnSubmitReview.addEventListener('click', () => {
 });
 
 /* ===================================================
-   🗺️ 기능 4: Leaflet 인터랙티브 지도 연동
+   🗺️ 기능 4: Leaflet & 네이버 지도 거점 좌표
    =================================================== */
-const MYONGJI_COORDS = { lat: 37.5802, lng: 126.9234 }; // 명지대학교 인문캠퍼스
+const MYONGJI_COORDS = { lat: 37.5802, lng: 126.9234, name: '명지대학교 인문캠퍼스' };
+const MJC_COORDS = { lat: 37.5845, lng: 126.9240, name: '명지전문대학' };
+const BAENGNYEON_COORDS = { lat: 37.5768, lng: 126.9231, name: '백련시장 맛집 골목' };
 let mjuMarker = null;
 
 function initLeafletMap() {
@@ -958,14 +960,36 @@ function initNaverMap() {
       },
     });
 
-    // 명지대학교 인문캠퍼스 마커
-    new naver.maps.Marker({
+    // 1. 명지대학교 인문캠퍼스 마커
+    const mjuLandmarkMarker = new naver.maps.Marker({
       position: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
       map: naverMap,
       icon: {
-        content: '<div class="pin-bubble mju-pin"><span>🏛️</span></div>',
+        content: '<div class="pin-bubble mju-pin" title="명지대학교 인문캠퍼스"><span>🏛️</span></div>',
         size: new naver.maps.Size(38, 38),
         anchor: new naver.maps.Point(19, 38),
+      },
+    });
+
+    // 2. 명지전문대학 마커
+    const mjcLandmarkMarker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng),
+      map: naverMap,
+      icon: {
+        content: '<div class="pin-bubble mjc-pin" title="명지전문대학"><span>🏫</span></div>',
+        size: new naver.maps.Size(36, 36),
+        anchor: new naver.maps.Point(18, 36),
+      },
+    });
+
+    // 3. 백련시장 마커
+    const bnLandmarkMarker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng),
+      map: naverMap,
+      icon: {
+        content: '<div class="pin-bubble bn-pin" title="백련시장 맛집 골목"><span>🛒</span></div>',
+        size: new naver.maps.Size(36, 36),
+        anchor: new naver.maps.Point(18, 36),
       },
     });
   }
@@ -1088,9 +1112,12 @@ function updateNaverMapMarkers() {
 function fitNaverMapBounds() {
   if (!naverMap || !window.naver || !window.naver.maps) return;
   const bounds = new naver.maps.LatLngBounds();
+  // 3대 핵심 거점 (명지대, 명지전문대, 백련시장) 포함
   bounds.extend(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng));
+  bounds.extend(new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng));
+  bounds.extend(new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng));
   naverMarkers.forEach((m) => bounds.extend(m.getPosition()));
-  naverMap.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+  naverMap.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
 }
 
 // 목록 보기 ↔ 지도로 보기 뷰 모드 전환
@@ -1173,6 +1200,28 @@ if (btnMapCenterMju) {
       naverMap.morph(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng), 16);
     } else if (leafletMap) {
       leafletMap.flyTo([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], 16, { duration: 0.6 });
+    }
+  });
+}
+
+const btnMapCenterMjc = document.getElementById('btn-map-center-mjc');
+if (btnMapCenterMjc) {
+  btnMapCenterMjc.addEventListener('click', () => {
+    if (currentMapEngine === 'naver' && naverMap && window.naver && window.naver.maps) {
+      naverMap.morph(new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng), 16);
+    } else if (leafletMap) {
+      leafletMap.flyTo([MJC_COORDS.lat, MJC_COORDS.lng], 16, { duration: 0.6 });
+    }
+  });
+}
+
+const btnMapCenterBn = document.getElementById('btn-map-center-bn');
+if (btnMapCenterBn) {
+  btnMapCenterBn.addEventListener('click', () => {
+    if (currentMapEngine === 'naver' && naverMap && window.naver && window.naver.maps) {
+      naverMap.morph(new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng), 16);
+    } else if (leafletMap) {
+      leafletMap.flyTo([BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng], 16, { duration: 0.6 });
     }
   });
 }
