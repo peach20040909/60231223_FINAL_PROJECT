@@ -176,7 +176,7 @@
         <!-- 자바스크립트로 세련된 식당 카드가 렌더링됩니다 -->
       </div>
 
-      <!-- 2) 인터랙티브 Leaflet 지도 뷰 (기본 숨김) -->
+      <!-- 2) 인터랙티브 Leaflet / Naver 지도 뷰 (기본 숨김) -->
       <div id="map-view-container" class="map-view-container hidden">
         <!-- 지도 플로팅 컨트롤 바 -->
         <div class="map-floating-controls">
@@ -186,8 +186,12 @@
           <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn" title="현재 검색된 모든 식당을 한 화면에 맞춤">
             🎯 전체 식당 맞춤
           </button>
+          <button type="button" id="btn-toggle-naver-map" class="map-ctrl-btn naver-toggle-btn" title="네이버 지도 API v3 엔진으로 캔버스 전환">
+            🟢 네이버 지도 전환
+          </button>
         </div>
         <div id="leaflet-map" class="leaflet-map-element"></div>
+        <div id="naver-map-canvas" class="naver-map-element hidden"></div>
         <div class="map-legend">
           <span class="legend-item"><span class="legend-dot mju">🏛️</span> 명지대 인문캠</span>
           <span class="legend-item"><span class="legend-dot lv1"></span> Lv.1 입문</span>
@@ -199,6 +203,48 @@
       </div>
     </section>
   </main>
+
+  <!-- 🟢 네이버 지도 Client ID 간편 설정 모달 -->
+  <div id="naver-config-modal" class="modal-overlay hidden">
+    <div class="modal-sheet naver-config-sheet">
+      <div class="modal-top">
+        <span class="modal-tag" style="background:#e8f8ef; color:#03c75a;">🟢 네이버 지도 API 연동</span>
+        <button type="button" id="naver-config-close" class="btn-close">&times;</button>
+      </div>
+      <div class="naver-config-content" style="padding: 20px 24px;">
+        <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">네이버 지도 Client ID 등록</h3>
+        <p style="font-size: 13.5px; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+          네이버 클라우드 플랫폼(NCP)의 <b>Maps (Dynamic Map)</b> Client ID를 등록하면, 이 화면에서 실제 네이버 순정 지도를 띄울 수 있습니다.
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 12px; color: #475569; margin-bottom: 16px;">
+          💡 <b>간편 발급 가이드 (1분 소요):</b><br>
+          1. <a href="https://www.ncloud.com" target="_blank" rel="noopener noreferrer" style="color: #03c75a; font-weight: 700;">네이버 클라우드 플랫폼</a> 로그인<br>
+          2. [Services] ➔ [AI·NAVER API] ➔ [Application 등록]<br>
+          3. <b>Dynamic Map</b> 체크 ➔ 서비스 URL에 <code>http://localhost:3000</code> 등록<br>
+          4. 발급된 <b>Client ID</b>를 아래에 입력하거나 <code>.env</code> 파일에 <code>NAVER_CLIENT_ID=...</code> 등록!
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="input-naver-client-id" style="display: block; font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+            NCP Client ID (ncpKeyId)
+          </label>
+          <input 
+            type="text" 
+            id="input-naver-client-id" 
+            placeholder="예: ncp_client_id_xxxxxxxx" 
+            style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-family: monospace;"
+          />
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" id="btn-clear-naver-id" class="btn-secondary-action" style="padding: 10px 16px; font-size: 13px;">
+            초기화
+          </button>
+          <button type="button" id="btn-save-naver-id" class="btn-primary-action" style="background: #03c75a; border-color: #03c75a; padding: 10px 20px; font-size: 13px;">
+            적용 및 네이버 지도 실행 🚀
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 🎲 랜덤 혼밥 추천 룰렛 모달 -->
   <div id="roulette-modal" class="modal-overlay hidden">

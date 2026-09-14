@@ -884,6 +884,173 @@ function fitMapBounds() {
   }
 }
 
+/* ===================================================
+   🗺️ 기능 4-B: 네이버 지도 API v3 연동 & 하이브리드 전환
+   =================================================== */
+let naverMap = null;
+let naverMarkers = [];
+let naverInfoWindows = [];
+let currentMapEngine = 'leaflet'; // 'leaflet' | 'naver'
+let naverClientId = localStorage.getItem('solo_map_naver_client_id') || '';
+
+// 서버 환경변수(NAVER_CLIENT_ID) 확인
+fetch('/api/config')
+  .then((res) => res.json())
+  .then((cfg) => {
+    if (cfg && cfg.naverClientId) {
+      naverClientId = cfg.naverClientId;
+      localStorage.setItem('solo_map_naver_client_id', cfg.naverClientId);
+    }
+    if (naverClientId) {
+      loadNaverMapSdk(naverClientId);
+    }
+  })
+  .catch(() => {});
+
+function loadNaverMapSdk(clientId) {
+  if (window.naver && window.naver.maps) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const existing = document.getElementById('naver-maps-sdk-script');
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.id = 'naver-maps-sdk-script';
+    script.type = 'text/javascript';
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}`;
+    script.onload = () => {
+      console.log('🟢 네이버 지도 v3 SDK 로드 성공!');
+      resolve(true);
+    };
+    script.onerror = () => {
+      console.warn('네이버 지도 SDK 로드 실패 (Client ID 또는 도메인 등록을 확인하세요)');
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function initNaverMap() {
+  if (!window.naver || !window.naver.maps) return false;
+
+  const canvasElem = document.getElementById('naver-map-canvas');
+  if (!canvasElem) return false;
+
+  if (!naverMap) {
+    naverMap = new naver.maps.Map('naver-map-canvas', {
+      center: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
+      zoom: 16,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: naver.maps.Position.TOP_LEFT,
+      },
+    });
+
+    // 명지대학교 인문캠퍼스 마커
+    new naver.maps.Marker({
+      position: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
+      map: naverMap,
+      icon: {
+        content: '<div class="pin-bubble mju-pin"><span>🏛️</span></div>',
+        size: new naver.maps.Size(38, 38),
+        anchor: new naver.maps.Point(19, 38),
+      },
+    });
+  }
+
+  updateNaverMapMarkers();
+  return true;
+}
+
+function updateNaverMapMarkers() {
+  if (!naverMap || !window.naver || !window.naver.maps) return;
+
+  // 기존 마커 및 인포윈도우 제거
+  naverMarkers.forEach((m) => m.setMap(null));
+  naverMarkers = [];
+  naverInfoWindows.forEach((w) => w.close());
+  naverInfoWindows = [];
+
+  const filtered = getFilteredList();
+
+  filtered.forEach((place) => {
+    if (!place.y || !place.x) return;
+    const lat = Number(place.y);
+    const lng = Number(place.x);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    const soloInfo = getDynamicSoloIndex(place);
+    const catIcon = getCategoryEmoji(place.category_name, place.place_name);
+    const walk = formatDistanceWalking(place.distance);
+    const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
+    const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
+
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(lat, lng),
+      map: naverMap,
+      icon: {
+        content: `<div class="pin-bubble ${soloInfo.pillClass}"><span>${soloInfo.lv}</span></div>`,
+        size: new naver.maps.Size(32, 32),
+        anchor: new naver.maps.Point(16, 32),
+      },
+    });
+
+    const popupHtml = `
+      <div class="map-popup-card clean-popup" style="padding: 14px;">
+        <div class="popup-header-row">
+          <div class="popup-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};">
+            <span>${catIcon.icon}</span>
+          </div>
+          <div class="popup-title-box">
+            <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
+            <div class="popup-badges-row">
+              <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
+              <span class="distance-pill">${walk}</span>
+            </div>
+          </div>
+        </div>
+        <div class="popup-body" style="padding-top: 6px;">
+          <p class="popup-psychology">${soloInfo.psychology}</p>
+          <p class="popup-meta">📍 ${escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음')}</p>
+          <div class="popup-footer-actions">
+            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn kakao">
+              🟡 카카오맵
+            </a>
+            <a href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn naver">
+              🟢 네이버 지도
+            </a>
+            <button type="button" class="popup-btn secondary" onclick="openReviewModalById('${place.id}')">
+              ✏️ 리뷰 작성
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const infoWindow = new naver.maps.InfoWindow({
+      content: popupHtml,
+      borderWidth: 0,
+      backgroundColor: 'transparent',
+      disableAnchor: true,
+    });
+
+    naver.maps.Event.addListener(marker, 'click', () => {
+      naverInfoWindows.forEach((w) => w.close());
+      infoWindow.open(naverMap, marker);
+    });
+
+    naverMarkers.push(marker);
+    naverInfoWindows.push(infoWindow);
+  });
+}
+
+function fitNaverMapBounds() {
+  if (!naverMap || !window.naver || !window.naver.maps) return;
+  const bounds = new naver.maps.LatLngBounds();
+  bounds.extend(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng));
+  naverMarkers.forEach((m) => bounds.extend(m.getPosition()));
+  naverMap.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+}
+
 // 목록 보기 ↔ 지도로 보기 뷰 모드 전환
 function switchViewMode(mode) {
   currentViewMode = mode;
@@ -899,14 +1066,21 @@ function switchViewMode(mode) {
     placesContainer.classList.add('hidden');
     mapViewContainer.classList.remove('hidden');
 
-    initLeafletMap();
-    setTimeout(() => {
-      if (leafletMap) {
-        leafletMap.invalidateSize();
-        updateMapMarkers();
-        fitMapBounds();
-      }
-    }, 120);
+    if (currentMapEngine === 'naver' && window.naver && window.naver.maps) {
+      initNaverMap();
+      setTimeout(() => {
+        fitNaverMapBounds();
+      }, 120);
+    } else {
+      initLeafletMap();
+      setTimeout(() => {
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+          updateMapMarkers();
+          fitMapBounds();
+        }
+      }, 120);
+    }
   }
 }
 
@@ -1014,6 +1188,111 @@ document.querySelectorAll('.difficulty-index .index-card').forEach((card) => {
     document.querySelector('.catalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+/* ===================================================
+   🟢 네이버 지도 전환 버튼 & Client ID 모달 연동
+   =================================================== */
+const btnToggleNaverMap = document.getElementById('btn-toggle-naver-map');
+const naverConfigModal = document.getElementById('naver-config-modal');
+const naverConfigClose = document.getElementById('naver-config-close');
+const inputNaverClientId = document.getElementById('input-naver-client-id');
+const btnSaveNaverId = document.getElementById('btn-save-naver-id');
+const btnClearNaverId = document.getElementById('btn-clear-naver-id');
+
+function activateNaverMapEngine() {
+  currentMapEngine = 'naver';
+  document.getElementById('leaflet-map')?.classList.add('hidden');
+  document.getElementById('naver-map-canvas')?.classList.remove('hidden');
+  btnToggleNaverMap?.classList.add('active');
+  if (btnToggleNaverMap) btnToggleNaverMap.innerHTML = '🌐 기본 지도로 전환';
+
+  const ok = initNaverMap();
+  if (ok) {
+    fitNaverMapBounds();
+    showToast('🟢 네이버 순정 지도 모드로 전환되었습니다!');
+  }
+}
+
+function activateLeafletMapEngine() {
+  currentMapEngine = 'leaflet';
+  document.getElementById('naver-map-canvas')?.classList.add('hidden');
+  document.getElementById('leaflet-map')?.classList.remove('hidden');
+  btnToggleNaverMap?.classList.remove('active');
+  if (btnToggleNaverMap) btnToggleNaverMap.innerHTML = '🟢 네이버 지도 전환';
+
+  if (leafletMap) {
+    leafletMap.invalidateSize();
+    fitMapBounds();
+  }
+  showToast('🌐 글로벌 모던 지도 모드로 전환되었습니다.');
+}
+
+if (btnToggleNaverMap) {
+  btnToggleNaverMap.addEventListener('click', async () => {
+    if (currentMapEngine === 'naver') {
+      activateLeafletMapEngine();
+      return;
+    }
+
+    // 네이버 모드로 전환 시도
+    if (window.naver && window.naver.maps) {
+      activateNaverMapEngine();
+      return;
+    }
+
+    // 키가 저장되어 있으면 로드 시도
+    if (naverClientId) {
+      const ok = await loadNaverMapSdk(naverClientId);
+      if (ok) {
+        activateNaverMapEngine();
+        return;
+      }
+    }
+
+    // 키가 없거나 실패 시 모달 오픈
+    if (inputNaverClientId) inputNaverClientId.value = naverClientId || '';
+    naverConfigModal?.classList.remove('hidden');
+  });
+}
+
+if (naverConfigClose) {
+  naverConfigClose.addEventListener('click', () => naverConfigModal?.classList.add('hidden'));
+}
+naverConfigModal?.addEventListener('click', (e) => {
+  if (e.target === naverConfigModal) naverConfigModal.classList.add('hidden');
+});
+
+if (btnSaveNaverId) {
+  btnSaveNaverId.addEventListener('click', async () => {
+    const val = inputNaverClientId?.value.trim();
+    if (!val) {
+      alert('네이버 클라우드 플랫폼(NCP)의 Client ID를 입력해 주세요!');
+      return;
+    }
+    naverClientId = val;
+    localStorage.setItem('solo_map_naver_client_id', val);
+    naverConfigModal?.classList.add('hidden');
+
+    showToast('네이버 지도 SDK를 불러오는 중입니다...');
+    const ok = await loadNaverMapSdk(val);
+    if (ok) {
+      activateNaverMapEngine();
+    } else {
+      alert('네이버 지도 SDK를 로드하지 못했습니다.\nClient ID가 올바른지, 콘솔에서 웹 서비스 URL(http://localhost:3000)이 등록되어 있는지 확인해주세요.');
+    }
+  });
+}
+
+if (btnClearNaverId) {
+  btnClearNaverId.addEventListener('click', () => {
+    localStorage.removeItem('solo_map_naver_client_id');
+    naverClientId = '';
+    if (inputNaverClientId) inputNaverClientId.value = '';
+    activateLeafletMapEngine();
+    naverConfigModal?.classList.add('hidden');
+    showToast('네이버 Client ID가 초기화되었습니다.');
+  });
+}
 
 /* ===================================================
    초기화 실행

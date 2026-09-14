@@ -22,9 +22,15 @@ app.use(express.urlencoded({ extended: true }));
 // public 폴더의 정적 파일(업로드 이미지 등)을 웹에서 바로 접근할 수 있도록 서빙
 app.use(express.static('public'));
 
-// 2. 헬스체크(Health Check) 엔드포인트
+// 2. 헬스체크 및 공개 설정 엔드포인트
 app.get('/api/health', (req, res) => {
   res.send('solo-map API running');
+});
+
+app.get('/api/config', (req, res) => {
+  res.json({
+    naverClientId: process.env.NAVER_CLIENT_ID || '',
+  });
 });
 
 // 3. 기능별 라우터 등록 (/api 접두어로 통일)
