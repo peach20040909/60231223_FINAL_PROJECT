@@ -14,7 +14,7 @@
   <!-- 헤더 네비게이션 -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand">
+      <a href="/" class="brand" id="logo-home" title="처음 페이지로 이동" style="text-decoration: none; color: inherit; cursor: pointer;">
         <div class="brand-logo">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
@@ -28,7 +28,7 @@
           <span class="brand-name">혼밥지도</span>
           <span class="brand-sub">SoloMap</span>
         </div>
-      </div>
+      </a>
 
       <div class="campus-selector">
         <span class="campus-pin">📍</span>
@@ -95,41 +95,46 @@
       </div>
     </section>
 
-    <!-- 디테일한 현실 반영 혼밥 난이도 기준 카드 바 -->
+    <!-- 현실적 대중 시각 5단계 혼밥 난이도 기준 카드 바 (클릭 시 해당 레벨 즉시 필터) -->
     <section class="difficulty-index">
-      <div class="index-card">
+      <div class="index-card" data-level="1" role="button" tabindex="0" title="클릭하여 Lv.1 식당 필터링">
         <div class="index-level lv-1">Lv.1</div>
         <div class="index-info">
-          <h4>초급 혼밥</h4>
-          <p>패스트푸드 · 버거 · 김밥/도시락</p>
+          <h4>입문 혼밥</h4>
+          <p>편의점 · 학식 · 버거 · 토스트 · 도시락</p>
+          <span class="index-mindset">시선 신경 0% · 키오스크 선불</span>
         </div>
       </div>
-      <div class="index-card">
+      <div class="index-card" data-level="2" role="button" tabindex="0" title="클릭하여 Lv.2 식당 필터링">
         <div class="index-level lv-2">Lv.2</div>
         <div class="index-info">
           <h4>혼밥 성지</h4>
-          <p>국밥 · 라멘/일식 · 1인 바 테이블</p>
+          <p>국밥(순대/설렁탕) · 라멘 · 1인 바 테이블</p>
+          <span class="index-mindset">한국인 공인 1위 · 1인 뚝배기 환영</span>
         </div>
       </div>
-      <div class="index-card">
+      <div class="index-card" data-level="3" role="button" tabindex="0" title="클릭하여 Lv.3 식당 필터링">
         <div class="index-level lv-3">Lv.3</div>
         <div class="index-info">
           <h4>일반 밥집</h4>
-          <p>백반 · 찌개 · 중식 · 마라탕</p>
+          <p>백반 · 찌개 · 중식 · 마라탕 · 돈까스</p>
+          <span class="index-mindset">든든한 한 끼 · 피크시간엔 눈치 살짝</span>
         </div>
       </div>
-      <div class="index-card">
+      <div class="index-card" data-level="4" role="button" tabindex="0" title="클릭하여 Lv.4 식당 필터링">
         <div class="index-level lv-4">Lv.4</div>
         <div class="index-info">
           <h4>다인석 식당</h4>
-          <p>떡볶이(즉석/엽떡) · 샤브 · 패밀리</p>
+          <p>떡볶이(즉석/엽떡) · 샤브 · 파스타 · 피자</p>
+          <span class="index-mindset">2인 냄비 or 데이트 위주 · 살짝 용기</span>
         </div>
       </div>
-      <div class="index-card">
+      <div class="index-card" data-level="5" role="button" tabindex="0" title="클릭하여 Lv.5 식당 필터링">
         <div class="index-level lv-5">Lv.5</div>
         <div class="index-info">
-          <h4>혼밥 마스터</h4>
-          <p>고깃집 · 곱창/막창 · 횟집/술집</p>
+          <h4>혼밥 끝판왕</h4>
+          <p>삼겹살/고깃집 · 곱창/막창 · 횟집 · 술집</p>
+          <span class="index-mindset">불판 구이 & 술자리 회식 · 마스터 용자</span>
         </div>
       </div>
     </section>
@@ -173,14 +178,23 @@
 
       <!-- 2) 인터랙티브 Leaflet 지도 뷰 (기본 숨김) -->
       <div id="map-view-container" class="map-view-container hidden">
+        <!-- 지도 플로팅 컨트롤 바 -->
+        <div class="map-floating-controls">
+          <button type="button" id="btn-map-center-mju" class="map-ctrl-btn" title="명지대학교 캠퍼스 중심으로 화면 이동">
+            📍 명지대 중심
+          </button>
+          <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn" title="현재 검색된 모든 식당을 한 화면에 맞춤">
+            🎯 전체 식당 맞춤
+          </button>
+        </div>
         <div id="leaflet-map" class="leaflet-map-element"></div>
         <div class="map-legend">
           <span class="legend-item"><span class="legend-dot mju">🏛️</span> 명지대 인문캠</span>
-          <span class="legend-item"><span class="legend-dot lv1"></span> Lv.1 초급</span>
+          <span class="legend-item"><span class="legend-dot lv1"></span> Lv.1 입문</span>
           <span class="legend-item"><span class="legend-dot lv2"></span> Lv.2 성지</span>
           <span class="legend-item"><span class="legend-dot lv3"></span> Lv.3 일반</span>
           <span class="legend-item"><span class="legend-dot lv4"></span> Lv.4 다인석</span>
-          <span class="legend-item"><span class="legend-dot lv5"></span> Lv.5 마스터</span>
+          <span class="legend-item"><span class="legend-dot lv5"></span> Lv.5 끝판왕</span>
         </div>
       </div>
     </section>

@@ -64,6 +64,13 @@ body {
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.brand:hover {
+  transform: scale(1.03);
+  opacity: 0.92;
 }
 
 .brand-logo {
@@ -364,13 +371,29 @@ body {
 
 .index-card {
   background: #ffffff;
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   border-radius: 16px;
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.index-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 82, 38, 0.4);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.1);
+}
+
+.index-card.active {
+  background: #fff9f6;
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px -4px rgba(255, 82, 38, 0.25);
+  transform: translateY(-2px);
 }
 
 .index-level {
@@ -388,8 +411,8 @@ body {
 .index-level.lv-5 { background: var(--lv5-bg); color: var(--lv5-color); }
 
 .index-info h4 {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 800;
   color: var(--text-main);
   margin-bottom: 2px;
 }
@@ -397,6 +420,19 @@ body {
 .index-info p {
   font-size: 11px;
   color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.index-mindset {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 3px;
+  background: rgba(255, 82, 38, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
 }
 
 /* 식당 리스트 헤더 */
@@ -547,6 +583,48 @@ body {
   width: 100%;
   height: 100%;
   z-index: 1;
+}
+
+/* 지도 상단 플로팅 컨트롤 바 (명지대 중심 복귀, 전체 식당 맞춤) */
+.map-floating-controls {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.map-ctrl-btn {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  color: var(--text-main);
+  border: 1.5px solid var(--border-light);
+  border-radius: 14px;
+  padding: 10px 15px;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.map-ctrl-btn:hover {
+  background: #ffffff;
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 82, 38, 0.18);
+}
+
+.map-ctrl-btn:active {
+  transform: scale(0.96);
 }
 
 /* 지도 범례 */
