@@ -1108,21 +1108,10 @@ function switchViewMode(mode) {
     placesContainer.classList.add('hidden');
     mapViewContainer.classList.remove('hidden');
 
-    if (currentMapEngine === 'naver' && window.naver && window.naver.maps) {
-      initNaverMap();
-      setTimeout(() => {
-        fitNaverMapBounds();
-      }, 120);
-    } else {
-      initLeafletMap();
-      setTimeout(() => {
-        if (leafletMap) {
-          leafletMap.invalidateSize();
-          updateMapMarkers();
-          fitMapBounds();
-        }
-      }, 120);
-    }
+    initNaverMap();
+    setTimeout(() => {
+      fitNaverMapBounds();
+    }, 120);
   }
 }
 
@@ -1247,111 +1236,6 @@ document.querySelectorAll('.difficulty-index .index-card').forEach((card) => {
     document.querySelector('.catalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
-
-/* ===================================================
-   🟢 네이버 지도 전환 버튼 & Client ID 모달 연동
-   =================================================== */
-const btnToggleNaverMap = document.getElementById('btn-toggle-naver-map');
-const naverConfigModal = document.getElementById('naver-config-modal');
-const naverConfigClose = document.getElementById('naver-config-close');
-const inputNaverClientId = document.getElementById('input-naver-client-id');
-const btnSaveNaverId = document.getElementById('btn-save-naver-id');
-const btnClearNaverId = document.getElementById('btn-clear-naver-id');
-
-function activateNaverMapEngine() {
-  currentMapEngine = 'naver';
-  document.getElementById('leaflet-map')?.classList.add('hidden');
-  document.getElementById('naver-map-canvas')?.classList.remove('hidden');
-  btnToggleNaverMap?.classList.add('active');
-  if (btnToggleNaverMap) btnToggleNaverMap.innerHTML = '🌐 기본 지도로 전환';
-
-  const ok = initNaverMap();
-  if (ok) {
-    fitNaverMapBounds();
-    showToast('🟢 네이버 순정 지도 모드로 전환되었습니다!');
-  }
-}
-
-function activateLeafletMapEngine() {
-  currentMapEngine = 'leaflet';
-  document.getElementById('naver-map-canvas')?.classList.add('hidden');
-  document.getElementById('leaflet-map')?.classList.remove('hidden');
-  btnToggleNaverMap?.classList.remove('active');
-  if (btnToggleNaverMap) btnToggleNaverMap.innerHTML = '🟢 네이버 지도 전환';
-
-  if (leafletMap) {
-    leafletMap.invalidateSize();
-    fitMapBounds();
-  }
-  showToast('🌐 글로벌 모던 지도 모드로 전환되었습니다.');
-}
-
-if (btnToggleNaverMap) {
-  btnToggleNaverMap.addEventListener('click', async () => {
-    if (currentMapEngine === 'naver') {
-      activateLeafletMapEngine();
-      return;
-    }
-
-    // 네이버 모드로 전환 시도
-    if (window.naver && window.naver.maps) {
-      activateNaverMapEngine();
-      return;
-    }
-
-    // 키가 저장되어 있으면 로드 시도
-    if (naverClientId) {
-      const ok = await loadNaverMapSdk(naverClientId);
-      if (ok) {
-        activateNaverMapEngine();
-        return;
-      }
-    }
-
-    // 키가 없거나 실패 시 모달 오픈
-    if (inputNaverClientId) inputNaverClientId.value = naverClientId || '';
-    naverConfigModal?.classList.remove('hidden');
-  });
-}
-
-if (naverConfigClose) {
-  naverConfigClose.addEventListener('click', () => naverConfigModal?.classList.add('hidden'));
-}
-naverConfigModal?.addEventListener('click', (e) => {
-  if (e.target === naverConfigModal) naverConfigModal.classList.add('hidden');
-});
-
-if (btnSaveNaverId) {
-  btnSaveNaverId.addEventListener('click', async () => {
-    const val = inputNaverClientId?.value.trim();
-    if (!val) {
-      alert('네이버 클라우드 플랫폼(NCP)의 Client ID를 입력해 주세요!');
-      return;
-    }
-    naverClientId = val;
-    localStorage.setItem('solo_map_naver_client_id', val);
-    naverConfigModal?.classList.add('hidden');
-
-    showToast('네이버 지도 SDK를 불러오는 중입니다...');
-    const ok = await loadNaverMapSdk(val);
-    if (ok) {
-      activateNaverMapEngine();
-    } else {
-      alert('네이버 지도 SDK를 로드하지 못했습니다.\nClient ID가 올바른지, 콘솔에서 웹 서비스 URL(http://localhost:3000)이 등록되어 있는지 확인해주세요.');
-    }
-  });
-}
-
-if (btnClearNaverId) {
-  btnClearNaverId.addEventListener('click', () => {
-    localStorage.removeItem('solo_map_naver_client_id');
-    naverClientId = '';
-    if (inputNaverClientId) inputNaverClientId.value = '';
-    activateLeafletMapEngine();
-    naverConfigModal?.classList.add('hidden');
-    showToast('네이버 Client ID가 초기화되었습니다.');
-  });
-}
 
 /* ===================================================
    초기화 실행
