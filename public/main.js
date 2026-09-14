@@ -120,14 +120,30 @@ function getCategoryEmoji(category = '', name = '') {
   return { icon: '🍴', bg: '#f1f5f9', color: '#475569' };
 }
 
+// 네이버 지도 정확한 검색 URL 생성 (불필요한 접미사 없이 상호명 단독 검색으로 매칭 실패 0건 보장)
+function getNaverMapUrl(place) {
+  return `https://map.naver.com/p/search/${encodeURIComponent(place.place_name)}`;
+}
+
 // 현실 식당 및 메뉴 특성을 정밀 반영한 대중적 혼밥 난이도 5단계 알고리즘
 function evaluateSoloIndex(category = '', name = '') {
   const text = `${category} ${name}`.toLowerCase();
 
-  // Lv.5 혼밥 끝판왕 (불판 구이, 최소 2인 주문 필수, 시끌벅적 회식/술자리 분위기)
+  // 🐟 생선구이, 생선구이백반, 돈까스는 고기 불판구이가 아닌 1인 정식 혼밥 성지(Lv.2)
+  if (text.includes('생선') || text.includes('생선구이') || (text.includes('돈까스') && text.includes('구이'))) {
+    return {
+      lv: 2,
+      label: 'Lv.2 혼밥 성지',
+      pillClass: 'lv-2',
+      psychology: '노릇노릇 생선구이와 돈까스 1인 한상 · 편안하고 든든한 밥집 혼밥',
+      tags: ['#생선구이백반', '#1인정식', '#수제돈까스', '#든든한한상', '#혼밥환영'],
+    };
+  }
+
+  // Lv.5 혼밥 끝판왕 (불판 고기구이, 최소 2인 주문 필수, 시끌벅적 회식/술자리 분위기)
   if (
     text.includes('삼겹살') || text.includes('갈비') || text.includes('고깃집') ||
-    text.includes('구이') || text.includes('곱창') || text.includes('막창') ||
+    (text.includes('구이') && !text.includes('생선')) || text.includes('곱창') || text.includes('막창') ||
     text.includes('대창') || text.includes('닭갈비') || text.includes('조개구이') ||
     text.includes('횟집') || text.includes('회센터') || text.includes('참치') ||
     text.includes('주점') || text.includes('술집') || text.includes('호프') ||
@@ -289,30 +305,42 @@ function savePlaceReview(placeId, placeName, level, text) {
   return newReview;
 }
 
-// 사용자 리뷰가 있을 경우 가중 평균 난이도 계산
+// 식당별 고유 AI 큐레이션 및 사용자 리뷰 가중 평균 난이도 계산
 function getDynamicSoloIndex(place) {
   const base = evaluateSoloIndex(place.category_name, place.place_name);
+  const curation = place.curation;
+
   const reviews = getPlaceReviews(place.id);
-  if (reviews.length === 0) return base;
 
-  const sum = reviews.reduce((acc, r) => acc + r.level, 0);
-  const avg = Math.round(sum / reviews.length);
-  const clampLv = Math.min(5, Math.max(1, avg));
+  let lv = curation ? curation.soloLevel : base.lv;
+  let label = curation ? curation.levelLabel : base.label;
+  let psychology = (curation && curation.psychology) ? curation.psychology : base.psychology;
+  let tags = (curation && curation.tags && curation.tags.length > 0) ? curation.tags : base.tags;
 
-  const levelLabels = {
-    1: 'Lv.1 입문 혼밥',
-    2: 'Lv.2 혼밥 성지',
-    3: 'Lv.3 일반 밥집',
-    4: 'Lv.4 다인석 식당',
-    5: 'Lv.5 혼밥 끝판왕',
-  };
+  // 학우 직접 리뷰가 있을 경우 가중 평균 반영
+  if (reviews.length > 0) {
+    const sum = reviews.reduce((acc, r) => acc + r.level, 0);
+    const avg = Math.round(sum / reviews.length);
+    lv = Math.min(5, Math.max(1, avg));
+
+    const levelLabels = {
+      1: 'Lv.1 입문 혼밥',
+      2: 'Lv.2 혼밥 성지',
+      3: 'Lv.3 일반 밥집',
+      4: 'Lv.4 다인석 식당',
+      5: 'Lv.5 혼밥 끝판왕',
+    };
+    label = `${levelLabels[lv]} (학우평가)`;
+  }
 
   return {
-    lv: clampLv,
-    label: `${levelLabels[clampLv]} (학우평가)`,
-    pillClass: `lv-${clampLv}`,
-    tags: base.tags,
+    lv,
+    label,
+    pillClass: `lv-${lv}`,
+    psychology,
+    tags,
     userReviewCount: reviews.length,
+    isAiCuration: !!curation,
   };
 }
 
@@ -463,7 +491,7 @@ function createCardHtml(place) {
 
   // 카카오맵 및 네이버 지도 링크 (양대 플랫폼 듀얼 연동)
   const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
-  const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
+  const naverUrl = getNaverMapUrl(place);
 
   const reviewPreviewHtml = reviews.length > 0
     ? `
@@ -829,7 +857,7 @@ function updateMapMarkers() {
     const catIcon = getCategoryEmoji(place.category_name, place.place_name);
     const walk = formatDistanceWalking(place.distance);
     const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
-    const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
+    const naverUrl = getNaverMapUrl(place);
 
     const pinIcon = L.divIcon({
       className: 'custom-div-icon',
@@ -1032,7 +1060,7 @@ function updateNaverMapMarkers() {
     const catIcon = getCategoryEmoji(place.category_name, place.place_name);
     const walk = formatDistanceWalking(place.distance);
     const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
-    const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.place_name + ' 명지대')}`;
+    const naverUrl = getNaverMapUrl(place);
 
     const marker = new naver.maps.Marker({
       position: new naver.maps.LatLng(lat, lng),

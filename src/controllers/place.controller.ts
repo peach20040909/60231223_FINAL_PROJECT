@@ -14,6 +14,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { getPlaceCuration, type PlaceAiCuration } from '../lib/gemini.js';
+
 // 대동명지도 2026 ver. 명지대 실제 대학가 검증 맛집 데이터 로드 (개발 및 프로덕션 환경 완벽 호환)
 let daedongPlaces: KakaoPlaceDocument[] = [];
 try {
@@ -34,7 +36,7 @@ try {
   console.warn('⚠️ daedongPlaces.json 로드 실패:', err);
 }
 
-// 식당 키워드 검색 컨트롤러 (대동명지도 DB + 카카오 로컬 API 실시간 융합)
+// 식당 키워드 검색 컨트롤러 (대동명지도 DB + 카카오 로컬 API 실시간 융합 + Gemini 개별 큐레이션)
 export async function searchPlaces(req: Request, res: Response, next: NextFunction) {
   try {
     const query = (req.query.query as string) || '혼밥';
@@ -45,7 +47,7 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
 
     let matchedDaedong: KakaoPlaceDocument[] = [];
     if (isGeneralQuery) {
-      // 일반 전체 검색일 때는 대동명지도 111개 전체 식당 제공! (엄마손떡볶이, 모래내곱창, 주인백파스타 등 100% 노출)
+      // 일반 전체 검색일 때는 대동명지도 전체 식당 제공! (엄마손떡볶이, 모래내곱창, 주인백파스타 등 100% 노출)
       matchedDaedong = [...daedongPlaces];
     } else {
       // 특정 검색어(예: '곱창', '파스타', '떡볶이', '국밥' 등)일 때는 대동명지도 내 이름/카테고리 일치 식당 우선 필터
@@ -56,7 +58,6 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
     }
 
     // 2. 카카오 로컬 API 3대 거점 (인문캠, 명지전문대, 백련시장) 도보 상권(800m) 실시간 검색 병렬 수행
-    // 반경을 800m로 정밀 타겟팅하여 증산동, 불광천, 수색 등 먼 외곽 상권이 섞이지 않도록 방지!
     const hubs = [
       { name: '명지대 인문캠', x: MYONGJI_SEOUL_COORDS.x, y: MYONGJI_SEOUL_COORDS.y, radius: 800 },
       { name: '명지전문대', x: '126.9240', y: '37.5845', radius: 800 },
@@ -82,7 +83,7 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
     const results = await Promise.all(searchPromises);
 
     // 3. 대동명지도 식당을 최우선으로 리스트에 담고, 카카오 실시간 검색 결과를 중복 없이 병합
-    // 🎯 명지대 실제 도보 상권 (남가좌동, 가좌로, 증가로) 및 순수 식사/밥집(술집·반찬가게 제외) 엄격 필터링!
+    // 🎯 명지대 실제 도보 상권 및 순수 식사/밥집 필터링 (술집, 반찬가게, 마트, 도넛, 베이커리 등 비식당 전면 제외!)
     const isPureMealAndWalkingZone = (p: KakaoPlaceDocument) => {
       const lat = Number(p.y);
       const lng = Number(p.x);
@@ -98,13 +99,28 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
         return false;
       }
 
-      // 2. 🍺 혼밥에 부적절한 술집/주점/호프/포차/반찬가게 전면 제외 (미자네맛반찬, 돼지주막 등 100% 차단)
+      // 2. 🍺 혼밥에 부적절한 술집/주점/호프/포차/반찬가게 전면 제외
       if (name.includes('미자네맛반찬') || name.includes('돼지주막')) return false;
       if (cat.includes('술집') || cat.includes('호프') || cat.includes('포장마차') || cat.includes('주점') || cat.includes('이자카야') || cat.includes('반찬')) {
         return false;
       }
       const barKeywords = ['주막', '술집', '포차', '호프', '이자카야', '맥주', '주점', '반찬', '와인', '펍', 'pub', '소주', '비어'];
       if (barKeywords.some((kw) => name.includes(kw))) {
+        return false;
+      }
+
+      // 3. 🍩 식당이 아닌 마트/슈퍼/베이커리/도넛/디저트 제외 (던킨, 푸드마켓, 파리바게트 등 100% 차단!)
+      const nonRestaurantKeywords = [
+        '던킨', '푸드마켓', '파리바게', '파리바게뜨', '뚜레쥬르', '배스킨', '베스킨',
+        '도넛', '마켓', '마트', '슈퍼', '식자재', '정육점', '청과', '과일', '식료품',
+        '편의점', 'cu', 'gs25', '세븐일레븐', '이마트24', '다이소', '올리브영',
+        '와플대학', '공차', '메가커피', '컴포즈', '빽다방', '스타벅스', '투썸'
+      ];
+      if (nonRestaurantKeywords.some((kw) => name.includes(kw))) {
+        return false;
+      }
+
+      if (cat.includes('제과,베이커리') || cat.includes('가정,생활') || cat.includes('편의점') || cat.includes('마트') || cat.includes('슈퍼마켓')) {
         return false;
       }
 
@@ -127,15 +143,26 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
       }
     }
 
+    // 4. ✨ 각 식당마다 Gemini AI / 100% 개별 장점 큐레이션 결합 (천편일률적 멘트 탈피!)
+    const placesWithCuration = await Promise.all(
+      combinedPlaces.map(async (place) => {
+        const curation = await getPlaceCuration(place);
+        return {
+          ...place,
+          curation,
+        };
+      })
+    );
+
     res.json({
       success: true,
       meta: {
-        total_count: combinedPlaces.length,
-        pageable_count: combinedPlaces.length,
+        total_count: placesWithCuration.length,
+        pageable_count: placesWithCuration.length,
         is_end: true,
         daedong_count: matchedDaedong.length,
       },
-      places: combinedPlaces,
+      places: placesWithCuration,
     });
   } catch (error) {
     // 에러 발생 시 Express 전역 에러 핸들러로 전달
