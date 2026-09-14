@@ -954,8 +954,8 @@ function initNaverMap() {
     naverMap = new naver.maps.Map('naver-map-canvas', {
       center: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
       zoom: 16,
-      minZoom: 14, // 🛡️ 김포/인천 등 외부로 과도하게 축소되는 현상 방지! (명지대 대학가 집중)
-      maxZoom: 19, // 건물 상세 수준까지만 부드럽게 확대
+      minZoom: 15, // 🛡️ 명지대·명지전문대·백련시장 권역(800m)에 딱 맞춘 최적 줌 하한선 (휠 축소 이탈 방지)
+      maxZoom: 18, // 🛡️ 편안한 건물/골목 식별 줌 상한선 (휠 과다 확대 방지)
       zoomControl: true,
       zoomControlOptions: {
         position: naver.maps.Position.TOP_LEFT,
@@ -1111,15 +1111,36 @@ function updateNaverMapMarkers() {
   });
 }
 
-function fitNaverMapBounds() {
+function smoothFitNaverMapBounds(forceLevel = null) {
   if (!naverMap || !window.naver || !window.naver.maps) return;
+
+  const targetFilter = forceLevel !== null ? forceLevel : currentFilter;
+
+  // 1. 전체(all) 필터일 때: 명지대, 명지전문대, 백련시장 3대 거점을 모두 아우르는 넓고 부드러운 뷰
+  if (targetFilter === 'all' || !naverMarkers.length) {
+    const bounds = new naver.maps.LatLngBounds();
+    bounds.extend(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng));
+    bounds.extend(new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng));
+    bounds.extend(new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng));
+    naverMarkers.forEach((m) => bounds.extend(m.getPosition()));
+
+    const center = bounds.getCenter();
+    naverMap.morph(center, 16, { duration: 450, easing: 'easeOutCubic' });
+    return;
+  }
+
+  // 2. 특정 레벨(Lv.1 ~ Lv.5 또는 찜) 필터일 때: 해당 레벨 식당 마커들의 중심점으로 부드러운 스무스 모핑!
   const bounds = new naver.maps.LatLngBounds();
-  // 3대 핵심 거점 (명지대, 명지전문대, 백련시장) 포함
-  bounds.extend(new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng));
-  bounds.extend(new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng));
-  bounds.extend(new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng));
   naverMarkers.forEach((m) => bounds.extend(m.getPosition()));
-  naverMap.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
+  const center = bounds.getCenter();
+
+  // 마커 수에 따른 부드러운 줌 레벨 결정 (너무 과도하게 좁아지지 않도록 16~17 사이 최적화)
+  const targetZoom = naverMarkers.length > 5 ? 16.2 : 16.8;
+  naverMap.morph(center, targetZoom, { duration: 450, easing: 'easeOutCubic' });
+}
+
+function fitNaverMapBounds() {
+  smoothFitNaverMapBounds('all');
 }
 
 // 목록 보기 ↔ 지도로 보기 뷰 모드 전환
@@ -1180,6 +1201,7 @@ filterTabs.forEach((tab) => {
     currentFilter = finalFilter;
     renderFilteredPlaces();
     updateMapMarkers();
+    smoothFitNaverMapBounds(finalFilter);
   });
 });
 
@@ -1331,6 +1353,7 @@ document.querySelectorAll('.difficulty-index .index-card').forEach((card) => {
     currentFilter = finalFilter;
     renderFilteredPlaces();
     updateMapMarkers();
+    smoothFitNaverMapBounds(finalFilter);
 
     document.querySelector('.catalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });

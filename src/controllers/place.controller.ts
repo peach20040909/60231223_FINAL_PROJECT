@@ -82,25 +82,42 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
     const results = await Promise.all(searchPromises);
 
     // 3. 대동명지도 식당을 최우선으로 리스트에 담고, 카카오 실시간 검색 결과를 중복 없이 병합
-    // 🎯 명지대 실제 도보 상권 (남가좌동, 명지전문대 가좌로, 백련시장 증가로) 엄격 필터링!
-    const isInsideWalkingZone = (p: KakaoPlaceDocument) => {
+    // 🎯 명지대 실제 도보 상권 (남가좌동, 가좌로, 증가로) 및 순수 식사/밥집(술집·반찬가게 제외) 엄격 필터링!
+    const isPureMealAndWalkingZone = (p: KakaoPlaceDocument) => {
       const lat = Number(p.y);
       const lng = Number(p.x);
+      const name = p.place_name.toLowerCase();
+      const cat = (p.category_name || '').toLowerCase();
       const addr = (p.road_address_name || p.address_name || '').toLowerCase();
-      // 증산, 은평구, 수색 등 원거리 상권 제외
+
+      // 1. 증산, 은평구, 수색 등 원거리 상권 제외
       if (addr.includes('증산') || addr.includes('은평구') || addr.includes('수색')) {
         return false;
       }
-      return lat >= 37.573 && lat <= 37.588 && lng >= 126.917 && lng <= 126.933;
+      if (lat < 37.573 || lat > 37.588 || lng < 126.917 || lng > 126.933) {
+        return false;
+      }
+
+      // 2. 🍺 혼밥에 부적절한 술집/주점/호프/포차/반찬가게 전면 제외 (미자네맛반찬, 돼지주막 등 100% 차단)
+      if (name.includes('미자네맛반찬') || name.includes('돼지주막')) return false;
+      if (cat.includes('술집') || cat.includes('호프') || cat.includes('포장마차') || cat.includes('주점') || cat.includes('이자카야') || cat.includes('반찬')) {
+        return false;
+      }
+      const barKeywords = ['주막', '술집', '포차', '호프', '이자카야', '맥주', '주점', '반찬', '와인', '펍', 'pub', '소주', '비어'];
+      if (barKeywords.some((kw) => name.includes(kw))) {
+        return false;
+      }
+
+      return true;
     };
 
-    const combinedPlaces: KakaoPlaceDocument[] = matchedDaedong.filter(isInsideWalkingZone);
+    const combinedPlaces: KakaoPlaceDocument[] = matchedDaedong.filter(isPureMealAndWalkingZone);
     const existingIds = new Set<string>(combinedPlaces.map((p) => p.id));
     const existingNames = new Set<string>(combinedPlaces.map((p) => p.place_name.replace(/\s+/g, '')));
 
     for (const resData of results) {
       for (const place of resData.documents) {
-        if (!isInsideWalkingZone(place)) continue;
+        if (!isPureMealAndWalkingZone(place)) continue;
         const normName = place.place_name.replace(/\s+/g, '');
         if (!existingIds.has(place.id) && !existingNames.has(normName)) {
           existingIds.add(place.id);
