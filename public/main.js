@@ -647,7 +647,8 @@ btnSubmitReview.addEventListener('click', () => {
 /* ===================================================
    🗺️ 기능 4: Leaflet 인터랙티브 지도 연동
    =================================================== */
-const MYONGJI_COORDS = { lat: 37.5802, lng: 126.9230 }; // 명지대학교 인문캠퍼스
+const MYONGJI_COORDS = { lat: 37.5802, lng: 126.9234 }; // 명지대학교 인문캠퍼스
+let mjuMarker = null;
 
 function initLeafletMap() {
   if (leafletMap) return;
@@ -662,22 +663,22 @@ function initLeafletMap() {
     zoomControl: true,
   });
 
-  // 고화질 CartoDB Voyager 타일 레이어 (오픈소스 & API 키 불필요)
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  // 오픈소스 & 워터마크 없는 OpenStreetMap 표준 고화질 타일
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(leafletMap);
 
   // 명지대학교 인문캠퍼스 대표 마커
   const mjuIcon = L.divIcon({
-    className: 'custom-map-pin mju-pin',
-    html: '<span>🏛️</span>',
+    className: 'custom-div-icon',
+    html: '<div class="pin-bubble mju-pin"><span>🏛️</span></div>',
     iconSize: [38, 38],
     iconAnchor: [19, 38],
     popupAnchor: [0, -38],
   });
 
-  L.marker([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], { icon: mjuIcon })
+  mjuMarker = L.marker([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], { icon: mjuIcon })
     .addTo(leafletMap)
     .bindPopup(`
       <div style="padding: 10px 12px; font-family: 'Pretendard', sans-serif;">
@@ -709,8 +710,8 @@ function updateMapMarkers() {
     const walk = formatDistanceWalking(place.distance);
 
     const pinIcon = L.divIcon({
-      className: `custom-map-pin ${soloInfo.pillClass}`,
-      html: `<span>${soloInfo.lv}</span>`,
+      className: 'custom-div-icon',
+      html: `<div class="pin-bubble ${soloInfo.pillClass}"><span>${soloInfo.lv}</span></div>`,
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32],
@@ -745,6 +746,19 @@ function updateMapMarkers() {
   });
 }
 
+function fitMapBounds() {
+  if (!leafletMap) return;
+  const points = [[MYONGJI_COORDS.lat, MYONGJI_COORDS.lng]];
+  mapMarkers.forEach((m) => {
+    points.push([m.getLatLng().lat, m.getLatLng().lng]);
+  });
+  if (points.length > 1) {
+    leafletMap.fitBounds(points, { padding: [40, 40], maxZoom: 16 });
+  } else {
+    leafletMap.setView([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], 16);
+  }
+}
+
 // 목록 보기 ↔ 지도로 보기 뷰 모드 전환
 function switchViewMode(mode) {
   currentViewMode = mode;
@@ -765,8 +779,9 @@ function switchViewMode(mode) {
       if (leafletMap) {
         leafletMap.invalidateSize();
         updateMapMarkers();
+        fitMapBounds();
       }
-    }, 150);
+    }, 120);
   }
 }
 

@@ -591,45 +591,50 @@ body {
 .legend-dot.lv5 { background: var(--lv5-color); }
 
 /* 커스텀 Leaflet 지도 마커 핀 */
-.custom-map-pin {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 32px !important;
-  height: 32px !important;
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.pin-bubble {
+  width: 32px;
+  height: 32px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   border: 2px solid #ffffff;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease;
 }
 
-.custom-map-pin:hover {
-  transform: rotate(-45deg) scale(1.18);
-  z-index: 1000 !important;
+.pin-bubble:hover {
+  transform: rotate(-45deg) scale(1.22);
 }
 
-.custom-map-pin span {
+.pin-bubble span {
   transform: rotate(45deg);
   font-size: 11px;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
-.custom-map-pin.mju-pin {
+.pin-bubble.mju-pin {
   background: #002c5f !important;
-  width: 38px !important;
-  height: 38px !important;
+  width: 38px;
+  height: 38px;
   border-color: #ffd100;
+  box-shadow: 0 4px 16px rgba(0, 44, 95, 0.45);
 }
 
-.custom-map-pin.lv1 { background: var(--lv1-color); }
-.custom-map-pin.lv2 { background: var(--lv2-color); }
-.custom-map-pin.lv3 { background: var(--lv3-color); }
-.custom-map-pin.lv4 { background: var(--lv4-color); }
-.custom-map-pin.lv5 { background: var(--lv5-color); }
+.pin-bubble.lv-1 { background: var(--lv1-color); }
+.pin-bubble.lv-2 { background: var(--lv2-color); }
+.pin-bubble.lv-3 { background: var(--lv3-color); }
+.pin-bubble.lv-4 { background: var(--lv4-color); }
+.pin-bubble.lv-5 { background: var(--lv5-color); }
 
 /* Leaflet 팝업 스타일 */
 .leaflet-popup-content-wrapper {
