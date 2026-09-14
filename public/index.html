@@ -178,7 +178,7 @@
 
       <!-- 2) 인터랙티브 네이버 순정 지도 뷰 (기본 숨김) -->
       <div id="map-view-container" class="map-view-container hidden">
-        <!-- 지도 플로팅 컨트롤 바 (명지대, 명지전문대, 백련시장, 전체 권역 맞춤) -->
+        <!-- 지도 플로팅 컨트롤 바 (명지대, 명지전문대, 백련시장, 전체 권역 맞춤, 전체화면) -->
         <div class="map-floating-controls">
           <button type="button" id="btn-map-center-mju" class="map-ctrl-btn" title="명지대학교 인문캠퍼스 중심으로 이동">
             📍 명지대
@@ -191,6 +191,9 @@
           </button>
           <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn active-fit" title="명지대 · 명지전문대 · 백련시장 전체 식당을 한 화면에 맞춤">
             🎯 전체 권역 맞춤
+          </button>
+          <button type="button" id="btn-map-fullscreen" class="map-ctrl-btn fullscreen-btn" title="지도를 화면 가득 크게 보기">
+            <span class="fs-icon">⛶</span> <span class="fs-text">전체화면</span>
           </button>
         </div>
         <div id="naver-map-canvas" class="naver-map-element"></div>

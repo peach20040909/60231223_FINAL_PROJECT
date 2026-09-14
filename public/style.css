@@ -614,6 +614,35 @@ body {
   display: none;
 }
 
+/* 지도 전체화면(Fullscreen) 모드 */
+.map-view-container.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.map-view-container.fullscreen .naver-map-element,
+.map-view-container.fullscreen .leaflet-map-element {
+  height: 100vh !important;
+}
+
+.map-ctrl-btn.fullscreen-btn {
+  background: #ffffff;
+}
+
+.map-ctrl-btn.fullscreen-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
 /* 지도 상단 플로팅 컨트롤 바 (명지대 중심 복귀, 전체 식당 맞춤, 네이버 지도 전환) */
 .map-floating-controls {
   position: absolute;

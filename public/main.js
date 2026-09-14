@@ -954,6 +954,8 @@ function initNaverMap() {
     naverMap = new naver.maps.Map('naver-map-canvas', {
       center: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
       zoom: 16,
+      minZoom: 14, // 🛡️ 김포/인천 등 외부로 과도하게 축소되는 현상 방지! (명지대 대학가 집중)
+      maxZoom: 19, // 건물 상세 수준까지만 부드럽게 확대
       zoomControl: true,
       zoomControlOptions: {
         position: naver.maps.Position.TOP_LEFT,
@@ -1236,6 +1238,54 @@ if (btnMapFitBounds) {
     }
   });
 }
+
+// ⛶ 지도 전체화면(Fullscreen) 토글
+const btnMapFullscreen = document.getElementById('btn-map-fullscreen');
+if (btnMapFullscreen) {
+  btnMapFullscreen.addEventListener('click', () => {
+    const isNowFullscreen = mapViewContainer.classList.toggle('fullscreen');
+    btnMapFullscreen.classList.toggle('active', isNowFullscreen);
+
+    const fsText = btnMapFullscreen.querySelector('.fs-text');
+    const fsIcon = btnMapFullscreen.querySelector('.fs-icon');
+    if (fsText) fsText.textContent = isNowFullscreen ? '전체화면 닫기' : '전체화면';
+    if (fsIcon) fsIcon.textContent = isNowFullscreen ? '✕' : '⛶';
+
+    // 네이버 지도 캔버스 크기 즉시 리사이징
+    setTimeout(() => {
+      if (currentMapEngine === 'naver' && naverMap && window.naver && window.naver.maps) {
+        naverMap.autoResize();
+        fitNaverMapBounds();
+      } else if (leafletMap) {
+        leafletMap.invalidateSize();
+        fitMapBounds();
+      }
+    }, 100);
+
+    showToast(isNowFullscreen ? '지도를 전체화면으로 표시합니다 (ESC로 닫기)' : '일반 화면으로 복귀했습니다.');
+  });
+}
+
+// ESC 키 입력 시 전체화면 자동 닫기
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && mapViewContainer && mapViewContainer.classList.contains('fullscreen')) {
+    mapViewContainer.classList.remove('fullscreen');
+    if (btnMapFullscreen) {
+      btnMapFullscreen.classList.remove('active');
+      const fsText = btnMapFullscreen.querySelector('.fs-text');
+      const fsIcon = btnMapFullscreen.querySelector('.fs-icon');
+      if (fsText) fsText.textContent = '전체화면';
+      if (fsIcon) fsIcon.textContent = '⛶';
+    }
+    setTimeout(() => {
+      if (naverMap) {
+        naverMap.autoResize();
+        fitNaverMapBounds();
+      }
+    }, 100);
+    showToast('일반 화면으로 복귀했습니다.');
+  }
+});
 
 // 좌측 상단 로고 클릭 시 첫 화면으로 완벽 리셋
 function resetToHome(e) {
