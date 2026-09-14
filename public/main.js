@@ -839,11 +839,12 @@ function updateMapMarkers() {
 
     const popupHtml = `
       <div class="map-popup-card clean-popup">
+        <button type="button" class="popup-close-btn" title="닫기" onclick="closeCurrentInfoWindow()">&times;</button>
         <div class="popup-header-row">
           <div class="popup-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};">
             <span>${catIcon.icon}</span>
           </div>
-          <div class="popup-title-box">
+          <div class="popup-title-box" style="padding-right: 20px;">
             <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
             <div class="popup-badges-row">
               <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
@@ -973,6 +974,16 @@ function initNaverMap() {
   return true;
 }
 
+let currentOpenedNaverMarker = null;
+
+window.closeCurrentInfoWindow = function () {
+  naverInfoWindows.forEach((w) => w.close());
+  currentOpenedNaverMarker = null;
+  if (leafletMap) {
+    leafletMap.closePopup();
+  }
+};
+
 function updateNaverMapMarkers() {
   if (!naverMap || !window.naver || !window.naver.maps) return;
 
@@ -981,6 +992,7 @@ function updateNaverMapMarkers() {
   naverMarkers = [];
   naverInfoWindows.forEach((w) => w.close());
   naverInfoWindows = [];
+  currentOpenedNaverMarker = null;
 
   const filtered = getFilteredList();
 
@@ -1007,32 +1019,37 @@ function updateNaverMapMarkers() {
     });
 
     const popupHtml = `
-      <div class="map-popup-card clean-popup" style="padding: 14px;">
-        <div class="popup-header-row">
-          <div class="popup-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};">
-            <span>${catIcon.icon}</span>
-          </div>
-          <div class="popup-title-box">
-            <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
-            <div class="popup-badges-row">
-              <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
-              <span class="distance-pill">${walk}</span>
+      <div class="naver-infowindow-wrap">
+        <div class="map-popup-card clean-popup" style="padding: 16px 14px 14px;">
+          <!-- ✕ 팝업 닫기 버튼 -->
+          <button type="button" class="popup-close-btn" title="닫기" onclick="closeCurrentInfoWindow()">&times;</button>
+          
+          <div class="popup-header-row">
+            <div class="popup-icon-badge" style="background: ${catIcon.bg}; color: ${catIcon.color};">
+              <span>${catIcon.icon}</span>
+            </div>
+            <div class="popup-title-box" style="padding-right: 20px;">
+              <h4 class="popup-title">${escapeHtml(place.place_name)}</h4>
+              <div class="popup-badges-row">
+                <span class="difficulty-pill index-level ${soloInfo.pillClass}">${soloInfo.label}</span>
+                <span class="distance-pill">${walk}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="popup-body" style="padding-top: 6px;">
-          <p class="popup-psychology">${soloInfo.psychology}</p>
-          <p class="popup-meta">📍 ${escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음')}</p>
-          <div class="popup-footer-actions">
-            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn kakao">
-              🟡 카카오맵
-            </a>
-            <a href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn naver">
-              🟢 네이버 지도
-            </a>
-            <button type="button" class="popup-btn secondary" onclick="openReviewModalById('${place.id}')">
-              ✏️ 리뷰 작성
-            </button>
+          <div class="popup-body" style="padding-top: 6px;">
+            <p class="popup-psychology">${soloInfo.psychology}</p>
+            <p class="popup-meta">📍 ${escapeHtml(place.road_address_name || place.address_name || '주소 정보 없음')}</p>
+            <div class="popup-footer-actions">
+              <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn kakao">
+                🟡 카카오맵
+              </a>
+              <a href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer" class="popup-btn naver">
+                🟢 네이버 지도
+              </a>
+              <button type="button" class="popup-btn secondary" onclick="openReviewModalById('${place.id}')">
+                ✏️ 리뷰 작성
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1046,12 +1063,25 @@ function updateNaverMapMarkers() {
     });
 
     naver.maps.Event.addListener(marker, 'click', () => {
+      // 이미 열려 있는 마커를 다시 누르면 토글 닫기!
+      if (currentOpenedNaverMarker === marker) {
+        infoWindow.close();
+        currentOpenedNaverMarker = null;
+        return;
+      }
       naverInfoWindows.forEach((w) => w.close());
       infoWindow.open(naverMap, marker);
+      currentOpenedNaverMarker = marker;
     });
 
     naverMarkers.push(marker);
     naverInfoWindows.push(infoWindow);
+  });
+
+  // 지도 빈 곳 클릭 시 열려있는 팝업 자동 닫기
+  naver.maps.Event.clearListeners(naverMap, 'click');
+  naver.maps.Event.addListener(naverMap, 'click', () => {
+    closeCurrentInfoWindow();
   });
 }
 
@@ -1120,9 +1150,16 @@ kwChips.forEach((chip) => {
 
 filterTabs.forEach((tab) => {
   tab.addEventListener('click', () => {
-    filterTabs.forEach((t) => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentFilter = tab.dataset.filter;
+    const target = tab.dataset.filter;
+    // 이미 활성화된 필터(전체 제외)를 다시 누르면 '전체(all)'로 토글 취소!
+    const isAlreadyActive = currentFilter === target && target !== 'all';
+    const finalFilter = isAlreadyActive ? 'all' : target;
+
+    filterTabs.forEach((t) => t.classList.toggle('active', t.dataset.filter === finalFilter));
+    document.querySelectorAll('.difficulty-index .index-card').forEach((c) => {
+      c.classList.toggle('active', c.dataset.level === finalFilter);
+    });
+    currentFilter = finalFilter;
     renderFilteredPlaces();
     updateMapMarkers();
   });
@@ -1186,20 +1223,24 @@ if (logoHome) {
   logoHome.addEventListener('click', resetToHome);
 }
 
-// 상단 현실 반영 혼밥 난이도 카드 클릭 시 즉시 해당 레벨 필터링
+// 상단 현실 반영 혼밥 난이도 카드 클릭 시 즉시 해당 레벨 필터링 (이미 선택된 카드 다시 누르면 '전체'로 토글 취소)
 document.querySelectorAll('.difficulty-index .index-card').forEach((card) => {
   card.addEventListener('click', () => {
     const level = card.dataset.level;
     if (!level) return;
 
+    // 이미 선택된 카드를 다시 누르면 '전체(all)'로 토글 취소!
+    const isAlreadyActive = currentFilter === level;
+    const finalFilter = isAlreadyActive ? 'all' : level;
+
     filterTabs.forEach((t) => {
-      t.classList.toggle('active', t.dataset.filter === level);
+      t.classList.toggle('active', t.dataset.filter === finalFilter);
     });
     document.querySelectorAll('.difficulty-index .index-card').forEach((c) => {
-      c.classList.toggle('active', c === card);
+      c.classList.toggle('active', !isAlreadyActive && c === card);
     });
 
-    currentFilter = level;
+    currentFilter = finalFilter;
     renderFilteredPlaces();
     updateMapMarkers();
 

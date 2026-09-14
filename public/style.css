@@ -773,12 +773,50 @@ body {
   background: #ffffff;
   overflow: hidden;
   padding: 16px;
+  position: relative;
 }
 
 .map-popup-card.clean-popup {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+}
+
+.naver-infowindow-wrap {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  overflow: hidden;
+  position: relative;
+}
+
+.popup-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.popup-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: scale(1.1);
 }
 
 .popup-header-row {
