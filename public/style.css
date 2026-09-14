@@ -368,78 +368,86 @@ body {
   box-shadow: 0 2px 8px rgba(255, 82, 38, 0.15);
 }
 
-/* 난이도 기준 카드 5종 */
+/* 난이도 기준 카드 5종 (미니멀 클린 & 톤다운 모던 디자인) */
 .difficulty-index {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 36px;
+  gap: 10px;
+  margin-bottom: 32px;
 }
 
 .index-card {
   background: #ffffff;
-  border: 1.5px solid var(--border-light);
-  border-radius: 16px;
-  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow-sm);
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   user-select: none;
 }
 
 .index-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 82, 38, 0.4);
-  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.06);
 }
 
 .index-card.active {
-  background: #fff9f6;
-  border-color: var(--primary);
-  box-shadow: 0 8px 20px -4px rgba(255, 82, 38, 0.25);
-  transform: translateY(-2px);
+  background: #f8fafc;
+  border-color: #0f172a;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
 }
 
 .index-level {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
-  padding: 6px 10px;
+  padding: 5px 9px;
   border-radius: 8px;
   white-space: nowrap;
+  letter-spacing: -0.2px;
+  /* 쨍한 원색 대신 단정하고 차분한 소프트 톤 */
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
 }
 
-.index-level.lv-1 { background: var(--lv1-bg); color: var(--lv1-color); }
-.index-level.lv-2 { background: var(--lv2-bg); color: var(--lv2-color); }
-.index-level.lv-3 { background: var(--lv3-bg); color: var(--lv3-color); }
-.index-level.lv-4 { background: var(--lv4-bg); color: var(--lv4-color); }
-.index-level.lv-5 { background: var(--lv5-bg); color: var(--lv5-color); }
+/* 각 레벨별 은은한 파스텔 악센트 */
+.index-level.lv-1 { background: #f0fdf4; color: #166534; border-color: #dcfce7; }
+.index-level.lv-2 { background: #eff6ff; color: #1e40af; border-color: #dbeafe; }
+.index-level.lv-3 { background: #fefce8; color: #854d0e; border-color: #fef08a; }
+.index-level.lv-4 { background: #faf5ff; color: #6b21a8; border-color: #f3e8ff; }
+.index-level.lv-5 { background: #fef2f2; color: #991b1b; border-color: #fee2e2; }
 
 .index-info h4 {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 800;
-  color: var(--text-main);
+  color: #0f172a;
   margin-bottom: 2px;
 }
 
 .index-info p {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #64748b;
   line-height: 1.35;
+  margin-bottom: 0;
 }
 
 .index-mindset {
   display: block;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
   margin-top: 3px;
-  background: rgba(255, 82, 38, 0.08);
-  padding: 2px 6px;
-  border-radius: 4px;
-  width: fit-content;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  width: auto;
 }
 
 /* 식당 리스트 헤더 */
@@ -1399,7 +1407,7 @@ body {
 .card-solo-banner.lv-4 .solo-psychology-text { color: #7e22ce; }
 .card-solo-banner.lv-5 .solo-psychology-text { color: #b91c1c; }
 
-/* 듀얼 지도 액션 버튼 (카카오맵 + 네이버 지도) */
+/* 듀얼 지도 액션 버튼 (토스/애플 감성 모던 미니멀 버튼) */
 .dual-map-actions {
   display: flex;
   flex-direction: column;
@@ -1413,26 +1421,76 @@ body {
   gap: 8px;
 }
 
+.btn-map-link {
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.btn-map-link:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
 .btn-map-link.kakao {
-  background: #fee500;
-  color: #3c1e1e;
-  border: 1px solid #fada0a;
+  background: #fdfdf9;
+  color: #3f3f46;
+  border: 1px solid #f4eedb;
 }
 
 .btn-map-link.kakao:hover {
-  background: #fdd835;
-  border-color: #fbc02d;
+  background: #fef9c3;
+  border-color: #fde047;
+  color: #18181b;
 }
 
 .btn-map-link.naver {
-  background: #03c75a;
-  color: #ffffff;
-  border: 1px solid #02b150;
+  background: #f8fdf9;
+  color: #3f3f46;
+  border: 1px solid #e0f2e9;
 }
 
 .btn-map-link.naver:hover {
-  background: #02b150;
-  border-color: #029443;
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #14532d;
+}
+
+.btn-open-review {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-open-review:hover {
+  background: #fff7ed;
+  border-color: #ffedd5;
+  color: #ea580c;
 }
 
 /* 룰렛 위너 클린 카드 */
@@ -2046,6 +2104,59 @@ textarea:focus {
     font-size: 12.5px;
     padding: 5px 12px;
     border-radius: 16px;
+  }
+
+  /* 난이도 기준 카드: 모바일 앱 스타일 가로 스와이프 캐러셀 */
+  .difficulty-index {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 2px 2px 8px;
+    margin-bottom: 24px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+  }
+  .difficulty-index::-webkit-scrollbar {
+    display: none;
+  }
+  .index-card {
+    flex: 0 0 175px;
+    scroll-snap-align: start;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .index-info h4 {
+    font-size: 12.5px;
+  }
+  .index-info p {
+    font-size: 10px;
+  }
+  .index-mindset {
+    font-size: 9.5px;
+  }
+
+  /* 모바일 지도 상단 플로팅 컨트롤 바 (가로 슬라이드 칩) */
+  .map-floating-controls {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .map-floating-controls::-webkit-scrollbar {
+    display: none;
+  }
+  .map-ctrl-btn {
+    padding: 7px 11px;
+    font-size: 11.5px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
   }
 
   /* 카탈로그 헤더 & 난이도 필터 */

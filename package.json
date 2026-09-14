@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "typecheck": "tsc --noEmit",
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs = require('fs'); if(fs.existsSync('src/data')) fs.cpSync('src/data', 'dist/data', {recursive: true});\"",
     "start": "node dist/app.js"
   },
   "keywords": [

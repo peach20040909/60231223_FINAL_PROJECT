@@ -7,32 +7,65 @@
 import type { Request, Response, NextFunction } from 'express';
 import { searchPlacesByKeyword, MYONGJI_SEOUL_COORDS, type KakaoPlaceDocument } from '../lib/kakao.js';
 
-// 식당 키워드 검색 컨트롤러 (카카오 로컬 API 연동)
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 대동명지도 2026 ver. 명지대 실제 대학가 검증 맛집 데이터 로드 (개발 및 프로덕션 환경 완벽 호환)
+let daedongPlaces: KakaoPlaceDocument[] = [];
+try {
+  const candidatePaths = [
+    path.resolve(process.cwd(), 'src/data/daedongPlaces.json'),
+    path.resolve(process.cwd(), 'dist/data/daedongPlaces.json'),
+    path.resolve(__dirname, '../data/daedongPlaces.json'),
+  ];
+  const validPath = candidatePaths.find((p) => fs.existsSync(p));
+  if (validPath) {
+    const raw = fs.readFileSync(validPath, 'utf8');
+    daedongPlaces = JSON.parse(raw);
+    console.log(`✅ [대동명지도 2026] 명지대 맛집 ${daedongPlaces.length}곳 성공적으로 로드됨! (경로: ${validPath})`);
+  } else {
+    console.warn('⚠️ daedongPlaces.json 파일을 찾을 수 없습니다.');
+  }
+} catch (err) {
+  console.warn('⚠️ daedongPlaces.json 로드 실패:', err);
+}
+
+// 식당 키워드 검색 컨트롤러 (대동명지도 DB + 카카오 로컬 API 실시간 융합)
 export async function searchPlaces(req: Request, res: Response, next: NextFunction) {
   try {
-    const query = req.query.query as string;
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const size = req.query.size ? Number(req.query.size) : 15;
+    const query = (req.query.query as string) || '혼밥';
 
-    if (!query) {
-      res.status(400).json({
-        success: false,
-        message: '검색어(query) 쿼리 파라미터가 필요합니다. 예: ?query=홍대 라멘',
+    // 1. 대동명지도에서 검색어 매칭되는 식당 우선 추출
+    const qLower = query.toLowerCase().trim();
+    const isGeneralQuery = qLower === '혼밥' || qLower === '전체' || qLower === '맛집' || qLower === '식당' || qLower === '';
+
+    let matchedDaedong: KakaoPlaceDocument[] = [];
+    if (isGeneralQuery) {
+      // 일반 전체 검색일 때는 대동명지도 111개 전체 식당 제공! (엄마손떡볶이, 모래내곱창, 주인백파스타 등 100% 노출)
+      matchedDaedong = [...daedongPlaces];
+    } else {
+      // 특정 검색어(예: '곱창', '파스타', '떡볶이', '국밥' 등)일 때는 대동명지도 내 이름/카테고리 일치 식당 우선 필터
+      matchedDaedong = daedongPlaces.filter((p) => {
+        const text = `${p.place_name} ${p.category_name} ${p.road_address_name || ''}`.toLowerCase();
+        return text.includes(qLower);
       });
-      return;
     }
 
-    // 명지대 대학가 3대 핵심 생활 거점 (인문캠퍼스, 명지전문대, 백련시장)
-    // 단일 좌표 거리순의 국소 뭉침(정문 앞 100m만 나오는 현상)을 해결하고
-    // 명지전문대 북측 상권과 백련시장 남측 골목까지 대학가 전체를 풍성하게 커버!
+    // 2. 카카오 로컬 API 3대 거점 (인문캠, 명지전문대, 백련시장) 실시간 검색 병렬 수행
     const hubs = [
       { name: '명지대 인문캠', x: MYONGJI_SEOUL_COORDS.x, y: MYONGJI_SEOUL_COORDS.y, radius: 1500 },
       { name: '명지전문대', x: '126.9240', y: '37.5845', radius: 1500 },
       { name: '백련시장', x: '126.9231', y: '37.5768', radius: 1500 },
     ];
 
+    const kakaoSearchTerm = isGeneralQuery ? '명지대 맛집' : `${query} 명지대`;
+
     const searchPromises = hubs.map((hub) =>
-      searchPlacesByKeyword(query, {
+      searchPlacesByKeyword(kakaoSearchTerm, {
         page: 1,
         size: 15,
         x: hub.x,
@@ -47,14 +80,17 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
 
     const results = await Promise.all(searchPromises);
 
-    // 중복 제거 및 리스트 병합
-    const combinedPlaces: KakaoPlaceDocument[] = [];
-    const existingIds = new Set<string>();
+    // 3. 대동명지도 식당을 최우선으로 리스트에 담고, 카카오 실시간 검색 결과를 중복 없이 병합
+    const combinedPlaces: KakaoPlaceDocument[] = [...matchedDaedong];
+    const existingIds = new Set<string>(combinedPlaces.map((p) => p.id));
+    const existingNames = new Set<string>(combinedPlaces.map((p) => p.place_name.replace(/\s+/g, '')));
 
     for (const resData of results) {
       for (const place of resData.documents) {
-        if (!existingIds.has(place.id)) {
+        const normName = place.place_name.replace(/\s+/g, '');
+        if (!existingIds.has(place.id) && !existingNames.has(normName)) {
           existingIds.add(place.id);
+          existingNames.add(normName);
           combinedPlaces.push(place);
         }
       }
@@ -66,6 +102,7 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
         total_count: combinedPlaces.length,
         pageable_count: combinedPlaces.length,
         is_end: true,
+        daedong_count: matchedDaedong.length,
       },
       places: combinedPlaces,
     });
