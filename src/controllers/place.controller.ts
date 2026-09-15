@@ -109,18 +109,42 @@ export async function searchPlaces(req: Request, res: Response, next: NextFuncti
         return false;
       }
 
-      // 3. 🍩 식당이 아닌 마트/슈퍼/베이커리/도넛/디저트 제외 (던킨, 푸드마켓, 파리바게트 등 100% 차단!)
-      const nonRestaurantKeywords = [
-        '던킨', '푸드마켓', '파리바게', '파리바게뜨', '뚜레쥬르', '배스킨', '베스킨',
-        '도넛', '마켓', '마트', '슈퍼', '식자재', '정육점', '청과', '과일', '식료품',
-        '편의점', 'cu', 'gs25', '세븐일레븐', '이마트24', '다이소', '올리브영',
-        '와플대학', '공차', '메가커피', '컴포즈', '빽다방', '스타벅스', '투썸'
-      ];
-      if (nonRestaurantKeywords.some((kw) => name.includes(kw))) {
+      // 3. ☕ 밥집(식사) 추천 서비스이므로 카페/커피/디저트/베이커리 전면 차단!
+      // 카카오 카테고리 그룹 코드 CE7 = 카페
+      if (p.category_group_code === 'CE7') {
         return false;
       }
 
-      if (cat.includes('제과,베이커리') || cat.includes('가정,생활') || cat.includes('편의점') || cat.includes('마트') || cat.includes('슈퍼마켓')) {
+      // 카테고리 명칭 내 카페/디저트/음료/베이커리/찻집 차단 (식사류인 '본죽&비빔밥'은 예외 허용)
+      const cafeCategories = [
+        '카페', '커피', '디저트', '제과,베이커리', '베이커리', '제과', '찻집', '전통찻집',
+        '빙수', '아이스크림', '음료', '도넛', '와플', '마카롱', '생과일'
+      ];
+      if (cafeCategories.some((c) => cat.includes(c))) {
+        if (!name.includes('본죽')) {
+          return false;
+        }
+      }
+
+      // 4. 🍩 상호명 기준 카페/커피/디저트/베이커리 및 마트/편의점 전면 차단!
+      const cafeAndNonMealKeywords = [
+        '카페', '커피', 'cafe', 'coffee', '로스터리', 'roastery', '디저트', 'dessert',
+        '베이커리', 'bakery', '베이크', '다방', '찻집', '티룸', 'tearoom',
+        '빙수', '설빙', '공차', '버블티', '스무디', '탕후루', '요아정', '요거트', '아이스크림',
+        '배스킨', '베스킨', '와플대학', '와플', '도넛', '던킨', '크리스피', '마카롱',
+        '스타벅스', '투썸', '이디야', '메가커피', '컴포즈', '빽다방', '할리스', '탐앤탐스',
+        '엔제리너스', '파스쿠찌', '폴바셋', '더벤티', '감성커피', '하삼동', '커피빈',
+        '달콤커피', '매머드', '쥬씨', '생과일', '파리바게', '파리바게뜨', '뚜레쥬르',
+        '푸드마켓', '마켓', '마트', '슈퍼', '식자재', '정육점', '청과', '과일', '식료품',
+        '편의점', 'cu', 'gs25', '세븐일레븐', '이마트24', '다이소', '올리브영'
+      ];
+      if (cafeAndNonMealKeywords.some((kw) => name.includes(kw))) {
+        if (!name.includes('본죽')) {
+          return false;
+        }
+      }
+
+      if (cat.includes('가정,생활') || cat.includes('편의점') || cat.includes('마트') || cat.includes('슈퍼마켓')) {
         return false;
       }
 

@@ -745,12 +745,219 @@ body {
 .legend-dot.lv4 { background: var(--lv4-color); }
 .legend-dot.lv5 { background: var(--lv5-color); }
 
-/* 커스텀 Leaflet 지도 마커 핀 */
-.custom-div-icon {
+/* ===================================================
+   🗺️ 모던 캡슐 필(Pill) 지도 마커 스타일 (PC & 모바일 상호명 식별 개선)
+   =================================================== */
+.custom-div-icon,
+.custom-leaflet-marker-icon {
   background: transparent !important;
   border: none !important;
 }
 
+/* 마커 앵커 래퍼: 좌표 기준 정중앙 하단 포인터가 정확히 지도 좌표를 가리키도록 정렬 */
+.map-marker-anchor-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, calc(-100% - 5px));
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 100;
+  transition: z-index 0.15s ease;
+}
+
+/* 식당 캡슐 마커 본체: [Lv 배지] + [상호명] 한눈에 확인 */
+.map-place-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  padding: 3px 8px 3px 3px;
+  border-radius: 20px;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.22), 0 1px 3px rgba(15, 23, 42, 0.12);
+  border: 1.5px solid #e2e8f0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  position: relative;
+}
+
+/* 하단 뾰족한 포인터 화살표 (지도 위치 정확 조준) */
+.map-place-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #ffffff;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.12));
+}
+
+/* 레벨 원형 배지 (1~5 색상 뚜렷하게 구분) */
+.marker-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* 상호명 텍스트 (명확한 고대비, 깔끔한 말줄임) */
+.marker-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 레벨별 테마 색상 (배지 배경 및 테두리 은은한 액센트) */
+.map-place-marker.lv-1 .marker-level-badge { background: var(--lv1-color); }
+.map-place-marker.lv-2 .marker-level-badge { background: var(--lv2-color); }
+.map-place-marker.lv-3 .marker-level-badge { background: var(--lv3-color); }
+.map-place-marker.lv-4 .marker-level-badge { background: var(--lv4-color); }
+.map-place-marker.lv-5 .marker-level-badge { background: var(--lv5-color); }
+
+.map-place-marker.lv-1 { border-color: rgba(16, 185, 129, 0.45); }
+.map-place-marker.lv-2 { border-color: rgba(59, 130, 246, 0.45); }
+.map-place-marker.lv-3 { border-color: rgba(245, 158, 11, 0.45); }
+.map-place-marker.lv-4 { border-color: rgba(139, 92, 246, 0.45); }
+.map-place-marker.lv-5 { border-color: rgba(239, 68, 68, 0.45); }
+
+/* 마우스 호버 및 활성(클릭) 시: 부드럽게 확대 & 최상단으로 & 전체 이름 표시 */
+.map-marker-anchor-wrap:hover,
+.map-marker-anchor-wrap.hover,
+.map-marker-anchor-wrap.active {
+  z-index: 9999 !important;
+}
+
+.map-marker-anchor-wrap:hover .map-place-marker,
+.map-marker-anchor-wrap.hover .map-place-marker,
+.map-marker-anchor-wrap.active .map-place-marker {
+  transform: scale(1.12) translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28), 0 3px 8px rgba(15, 23, 42, 0.15);
+  border-color: #0f172a;
+}
+
+.map-marker-anchor-wrap:hover .marker-title,
+.map-marker-anchor-wrap.hover .marker-title,
+.map-marker-anchor-wrap.active .marker-title {
+  max-width: 170px; /* 호버 시 전체 상호명 시원하게 확인 */
+}
+
+/* 🏛️ 3대 거점 랜드마크 마커 배지 (명지대, 명지전문대, 백련시장) */
+.map-landmark-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  position: relative;
+  letter-spacing: -0.2px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.map-landmark-marker:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.map-landmark-marker.mju-landmark {
+  background: #002c5f;
+  color: #ffffff;
+  border: 2px solid #ffd100;
+}
+.map-landmark-marker.mju-landmark::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #002c5f;
+}
+
+.map-landmark-marker.mjc-landmark {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: 2px solid #93c5fd;
+}
+.map-landmark-marker.mjc-landmark::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #1d4ed8;
+}
+
+.map-landmark-marker.bn-landmark {
+  background: #d97706;
+  color: #ffffff;
+  border: 2px solid #fde68a;
+}
+.map-landmark-marker.bn-landmark::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #d97706;
+}
+
+/* 모바일 화면 (768px 이하) 마커 크기 최적화 */
+@media (max-width: 768px) {
+  .map-place-marker {
+    padding: 2.5px 7px 2.5px 2.5px;
+    gap: 4px;
+  }
+  .marker-level-badge {
+    width: 19px;
+    height: 19px;
+    font-size: 10.5px;
+  }
+  .marker-title {
+    font-size: 11px;
+    max-width: 68px;
+  }
+  .map-marker-anchor-wrap:hover .marker-title,
+  .map-marker-anchor-wrap.hover .marker-title,
+  .map-marker-anchor-wrap.active .marker-title {
+    max-width: 130px;
+  }
+}
+
+/* 레거시 pin-bubble 호환 유지 */
 .pin-bubble {
   width: 32px;
   height: 32px;
@@ -799,19 +1006,6 @@ body {
   height: 36px;
   border-color: #fde68a;
   box-shadow: 0 4px 16px rgba(217, 119, 6, 0.45);
-}
-
-.map-ctrl-btn.active-fit {
-  background: #ff5226;
-  color: #ffffff;
-  border-color: #ff5226;
-  box-shadow: 0 4px 16px rgba(255, 82, 38, 0.3);
-}
-
-.map-ctrl-btn.active-fit:hover {
-  background: #e03e15;
-  color: #ffffff;
-  border-color: #e03e15;
 }
 
 .pin-bubble.lv-1 { background: var(--lv1-color); }

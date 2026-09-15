@@ -185,8 +185,7 @@ function evaluateSoloIndex(category = '', name = '') {
     text.includes('토스트') || text.includes('이삭') || text.includes('김밥') ||
     text.includes('김밥천국') || text.includes('도시락') || text.includes('한솥') ||
     text.includes('컵밥') || text.includes('편의점') || text.includes('학식') ||
-    text.includes('만두') || text.includes('베이커리') || text.includes('카페') ||
-    text.includes('바비든든')
+    text.includes('만두') || text.includes('바비든든')
   ) {
     return {
       lv: 1,
@@ -233,6 +232,35 @@ function formatDistanceWalking(distanceMeter) {
   if (isNaN(m)) return '명지대 근처';
   const min = Math.max(1, Math.round(m / 65));
   return `도보 ${min}분 · ${m}m`;
+}
+
+// 🎯 순수 밥집(식사) 판별 헬퍼: 추천 대상에서 카페, 디저트, 베이커리, 음료 매장 전면 차단
+function isMealRestaurant(place) {
+  if (!place) return false;
+  const name = (place.place_name || '').toLowerCase();
+  const cat = (place.category_name || '').toLowerCase();
+  const group = place.category_group_code || '';
+
+  // 카카오 카테고리 CE7 (카페) 차단
+  if (group === 'CE7') return false;
+
+  // 본죽&비빔밥 등 식사 전문점은 든든한 식사이므로 예외 허용
+  if (name.includes('본죽')) return true;
+
+  const cafeKeywords = [
+    '카페', '커피', 'cafe', 'coffee', '로스터리', 'roastery', '디저트', 'dessert',
+    '베이커리', 'bakery', '베이크', '다방', '찻집', '티룸', 'tearoom',
+    '빙수', '설빙', '공차', '버블티', '스무디', '탕후루', '요아정', '요거트', '아이스크림',
+    '배스킨', '베스킨', '와플대학', '와플', '도넛', '던킨', '크리스피', '마카롱',
+    '스타벅스', '투썸', '이디야', '메가커피', '컴포즈', '빽다방', '할리스', '탐앤탐스',
+    '엔제리너스', '파스쿠찌', '폴바셋', '더벤티', '감성커피', '하삼동', '커피빈',
+    '달콤커피', '매머드', '쥬씨', '생과일', '파리바게', '파리바게뜨', '뚜레쥬르'
+  ];
+
+  if (cafeKeywords.some((kw) => name.includes(kw) || cat.includes(kw))) {
+    return false;
+  }
+  return true;
 }
 
 /* ===================================================
@@ -422,7 +450,8 @@ async function loadPlaces(keyword) {
       throw new Error(data.message || '식당 정보를 불러오지 못했습니다.');
     }
 
-    currentPlaces = data.places || [];
+    // 순수 밥집/식사 식당만 필터링 (카페/디저트/음료 전면 배제)
+    currentPlaces = (data.places || []).filter(isMealRestaurant);
     renderFilteredPlaces();
     updateMapMarkers();
   } catch (err) {
@@ -651,10 +680,11 @@ function closeRouletteModal() {
 }
 
 function spinRoulette() {
-  const places = currentPlaces.length > 0 ? currentPlaces : [];
+  // 룰렛 추천 시 순수 밥집(식사) 식당만 엄선하여 추천
+  const places = (currentPlaces || []).filter(isMealRestaurant);
   if (places.length === 0) {
     rouletteCardSlot.innerHTML = `
-      <p style="color: #64748b; font-size: 14px;">검색된 식당이 없습니다. 먼저 식당을 검색해 주세요!</p>
+      <p style="color: #64748b; font-size: 14px;">추천 가능한 밥집 식당이 없습니다. 먼저 식당을 검색해 주세요!</p>
     `;
     return;
   }
@@ -816,11 +846,18 @@ function initLeafletMap() {
 
   // 명지대학교 인문캠퍼스 대표 마커
   const mjuIcon = L.divIcon({
-    className: 'custom-div-icon',
-    html: '<div class="pin-bubble mju-pin"><span>🏛️</span></div>',
-    iconSize: [38, 38],
-    iconAnchor: [19, 38],
-    popupAnchor: [0, -38],
+    className: 'custom-leaflet-marker-icon',
+    html: `
+      <div class="map-marker-anchor-wrap">
+        <div class="map-landmark-marker mju-landmark" title="명지대학교 인문캠퍼스">
+          <span class="landmark-icon">🏛️</span>
+          <span class="landmark-title">명지대 인문캠</span>
+        </div>
+      </div>
+    `,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    popupAnchor: [0, -36],
   });
 
   mjuMarker = L.marker([MYONGJI_COORDS.lat, MYONGJI_COORDS.lng], { icon: mjuIcon })
@@ -859,12 +896,21 @@ function updateMapMarkers() {
     const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
     const naverUrl = getNaverMapUrl(place);
 
+    const markerHtml = `
+      <div class="map-marker-anchor-wrap">
+        <div class="map-place-marker ${soloInfo.pillClass}" title="${escapeHtml(place.place_name)} (${soloInfo.label})">
+          <span class="marker-level-badge">${soloInfo.lv}</span>
+          <span class="marker-title">${escapeHtml(place.place_name)}</span>
+        </div>
+      </div>
+    `;
+
     const pinIcon = L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div class="pin-bubble ${soloInfo.pillClass}"><span>${soloInfo.lv}</span></div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      className: 'custom-leaflet-marker-icon',
+      html: markerHtml,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+      popupAnchor: [0, -36],
     });
 
     const popupHtml = `
@@ -900,7 +946,25 @@ function updateMapMarkers() {
       </div>
     `;
 
-    const marker = L.marker([lat, lng], { icon: pinIcon }).addTo(leafletMap).bindPopup(popupHtml);
+    const marker = L.marker([lat, lng], { icon: pinIcon, zIndexOffset: 100 })
+      .addTo(leafletMap)
+      .bindPopup(popupHtml);
+
+    marker.on('mouseover', () => {
+      marker.setZIndexOffset(9999);
+    });
+    marker.on('mouseout', () => {
+      if (!marker.isPopupOpen()) {
+        marker.setZIndexOffset(100);
+      }
+    });
+    marker.on('popupopen', () => {
+      marker.setZIndexOffset(10000);
+    });
+    marker.on('popupclose', () => {
+      marker.setZIndexOffset(100);
+    });
+
     mapMarkers.push(marker);
   });
 }
@@ -995,10 +1059,17 @@ function initNaverMap() {
       position: new naver.maps.LatLng(MYONGJI_COORDS.lat, MYONGJI_COORDS.lng),
       map: naverMap,
       icon: {
-        content: '<div class="pin-bubble mju-pin" title="명지대학교 인문캠퍼스"><span>🏛️</span></div>',
-        size: new naver.maps.Size(38, 38),
-        anchor: new naver.maps.Point(19, 38),
+        content: `
+          <div class="map-marker-anchor-wrap">
+            <div class="map-landmark-marker mju-landmark" title="명지대학교 인문캠퍼스">
+              <span class="landmark-icon">🏛️</span>
+              <span class="landmark-title">명지대 인문캠</span>
+            </div>
+          </div>
+        `,
+        anchor: new naver.maps.Point(0, 0),
       },
+      zIndex: 150,
     });
 
     // 2. 명지전문대학 마커
@@ -1006,10 +1077,17 @@ function initNaverMap() {
       position: new naver.maps.LatLng(MJC_COORDS.lat, MJC_COORDS.lng),
       map: naverMap,
       icon: {
-        content: '<div class="pin-bubble mjc-pin" title="명지전문대학"><span>🏫</span></div>',
-        size: new naver.maps.Size(36, 36),
-        anchor: new naver.maps.Point(18, 36),
+        content: `
+          <div class="map-marker-anchor-wrap">
+            <div class="map-landmark-marker mjc-landmark" title="명지전문대학">
+              <span class="landmark-icon">🏫</span>
+              <span class="landmark-title">명지전문대</span>
+            </div>
+          </div>
+        `,
+        anchor: new naver.maps.Point(0, 0),
       },
+      zIndex: 150,
     });
 
     // 3. 백련시장 마커
@@ -1017,10 +1095,17 @@ function initNaverMap() {
       position: new naver.maps.LatLng(BAENGNYEON_COORDS.lat, BAENGNYEON_COORDS.lng),
       map: naverMap,
       icon: {
-        content: '<div class="pin-bubble bn-pin" title="백련시장 맛집 골목"><span>🛒</span></div>',
-        size: new naver.maps.Size(36, 36),
-        anchor: new naver.maps.Point(18, 36),
+        content: `
+          <div class="map-marker-anchor-wrap">
+            <div class="map-landmark-marker bn-landmark" title="백련시장 맛집 골목">
+              <span class="landmark-icon">🛒</span>
+              <span class="landmark-title">백련시장</span>
+            </div>
+          </div>
+        `,
+        anchor: new naver.maps.Point(0, 0),
       },
+      zIndex: 150,
     });
   }
 
@@ -1032,6 +1117,9 @@ let currentOpenedNaverMarker = null;
 
 window.closeCurrentInfoWindow = function () {
   naverInfoWindows.forEach((w) => w.close());
+  if (currentOpenedNaverMarker) {
+    currentOpenedNaverMarker.setZIndex(100);
+  }
   currentOpenedNaverMarker = null;
   if (leafletMap) {
     leafletMap.closePopup();
@@ -1062,14 +1150,23 @@ function updateNaverMapMarkers() {
     const kakaoUrl = place.place_url || `https://map.kakao.com/link/search/${encodeURIComponent(place.place_name)}`;
     const naverUrl = getNaverMapUrl(place);
 
+    const markerHtml = `
+      <div class="map-marker-anchor-wrap">
+        <div class="map-place-marker ${soloInfo.pillClass}" title="${escapeHtml(place.place_name)} (${soloInfo.label})">
+          <span class="marker-level-badge">${soloInfo.lv}</span>
+          <span class="marker-title">${escapeHtml(place.place_name)}</span>
+        </div>
+      </div>
+    `;
+
     const marker = new naver.maps.Marker({
       position: new naver.maps.LatLng(lat, lng),
       map: naverMap,
       icon: {
-        content: `<div class="pin-bubble ${soloInfo.pillClass}"><span>${soloInfo.lv}</span></div>`,
-        size: new naver.maps.Size(32, 32),
-        anchor: new naver.maps.Point(16, 32),
+        content: markerHtml,
+        anchor: new naver.maps.Point(0, 0),
       },
+      zIndex: 100,
     });
 
     const popupHtml = `
@@ -1114,16 +1211,42 @@ function updateNaverMapMarkers() {
       borderWidth: 0,
       backgroundColor: 'transparent',
       disableAnchor: true,
+      pixelOffset: new naver.maps.Point(0, -36),
+    });
+
+    naver.maps.Event.addListener(marker, 'mouseover', () => {
+      marker.setZIndex(9999);
+      const el = marker.getElement();
+      if (el) {
+        const wrap = el.querySelector('.map-marker-anchor-wrap');
+        if (wrap) wrap.classList.add('hover');
+      }
+    });
+
+    naver.maps.Event.addListener(marker, 'mouseout', () => {
+      if (currentOpenedNaverMarker !== marker) {
+        marker.setZIndex(100);
+      }
+      const el = marker.getElement();
+      if (el) {
+        const wrap = el.querySelector('.map-marker-anchor-wrap');
+        if (wrap) wrap.classList.remove('hover');
+      }
     });
 
     naver.maps.Event.addListener(marker, 'click', () => {
       // 이미 열려 있는 마커를 다시 누르면 토글 닫기!
       if (currentOpenedNaverMarker === marker) {
         infoWindow.close();
+        marker.setZIndex(100);
         currentOpenedNaverMarker = null;
         return;
       }
+      if (currentOpenedNaverMarker) {
+        currentOpenedNaverMarker.setZIndex(100);
+      }
       naverInfoWindows.forEach((w) => w.close());
+      marker.setZIndex(10000);
       infoWindow.open(naverMap, marker);
       currentOpenedNaverMarker = marker;
     });
