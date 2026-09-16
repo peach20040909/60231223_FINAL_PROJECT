@@ -1004,19 +1004,6 @@ function initLeafletMap() {
   });
   window.leafletMap = leafletMap;
 
-  // 🎯 네이버 지도급 스마트 컴팩트 모드 (줌 16.5 이하에서 마커 겹침 100% 방지 & 60fps 무지연)
-  const updateMarkerDensity = () => {
-    const mapContainer = document.getElementById('map-view-container');
-    const leafletElem = document.getElementById('leaflet-map');
-    if (!leafletMap) return;
-    const currentZoom = leafletMap.getZoom();
-    const isCompact = currentZoom <= 16.5;
-    if (mapContainer) mapContainer.classList.toggle('compact-markers', isCompact);
-    if (leafletElem) leafletElem.classList.toggle('compact-markers', isCompact);
-  };
-  leafletMap.on('zoom', updateMarkerDensity);
-  leafletMap.on('zoomend', updateMarkerDensity);
-  setTimeout(updateMarkerDensity, 100);
 
   // 🗺️ 대한민국 국토교통부 브이월드(VWorld) 고해상도 고속 타일 (워터마크 0%, 한국어 도로/상호 완벽 지원, 버퍼링 최적화)
   L.tileLayer('https://xdworld.vworld.kr/2d/Base/service/{z}/{x}/{y}.png', {
@@ -1155,15 +1142,6 @@ function updateMapMarkers() {
 
     mapMarkers.push(marker);
   });
-
-  // 🎯 마커 업데이트 후 스마트 컴팩트 모드 즉시 적용
-  const mapContainer = document.getElementById('map-view-container');
-  const leafletElem = document.getElementById('leaflet-map');
-  if (leafletMap) {
-    const isCompact = leafletMap.getZoom() <= 16.5;
-    if (mapContainer) mapContainer.classList.toggle('compact-markers', isCompact);
-    if (leafletElem) leafletElem.classList.toggle('compact-markers', isCompact);
-  }
 }
 
 function fitMapBounds() {
@@ -1185,19 +1163,30 @@ function fitMapBounds() {
 let naverMap = null;
 let naverMarkers = [];
 let naverInfoWindows = [];
-let currentMapEngine = 'leaflet'; // 'leaflet' | 'naver' (기본값: Leaflet)
+let currentMapEngine = 'naver'; // 'naver' | 'leaflet' (사용자 기본값: 네이버 지도)
 let naverClientId = localStorage.getItem('solo_map_naver_client_id') || 'tnm1g865f5';
 
-// 서버 환경변수(NAVER_CLIENT_ID) 확인 및 자동 네이버 지도 SDK 백그라운드 준비
+// 🚀 기본 지도인 네이버 지도 v3 SDK를 즉시 선제적 로드
+loadNaverMapSdk(naverClientId);
+
+// 서버 환경변수(NAVER_CLIENT_ID) 확인 및 최신 키 동기화
 fetch('/api/config')
   .then((res) => res.json())
   .then(async (cfg) => {
-    if (cfg && cfg.naverClientId) {
+    if (cfg && cfg.naverClientId && cfg.naverClientId !== naverClientId) {
       naverClientId = cfg.naverClientId;
       localStorage.setItem('solo_map_naver_client_id', cfg.naverClientId);
-    }
-    if (naverClientId) {
       await loadNaverMapSdk(naverClientId);
+    }
+    if (currentViewMode === 'map' && currentMapEngine === 'naver') {
+      initNaverMap();
+      updateNaverMapMarkers();
+      setTimeout(() => {
+        if (naverMap) {
+          naverMap.autoResize();
+          fitNaverMapBounds();
+        }
+      }, 120);
     }
   })
   .catch(() => {});
@@ -1243,6 +1232,7 @@ function initNaverMap() {
         position: naver.maps.Position.TOP_LEFT,
       },
     });
+    window.naverMap = naverMap;
 
     // 1. 명지대학교 인문캠퍼스 마커
     const mjuLandmarkMarker = new naver.maps.Marker({
@@ -1502,18 +1492,57 @@ function switchViewMode(mode) {
     const naverCanvas = document.getElementById('naver-map-canvas');
     const leafletCanvas = document.getElementById('leaflet-map');
     const mapEngineLabel = document.getElementById('map-engine-label');
+    const btnToggle = document.getElementById('btn-toggle-map-engine');
 
-    if (currentMapEngine === 'naver' && window.naver && window.naver.maps) {
+    if (currentMapEngine === 'naver') {
       if (naverCanvas) naverCanvas.classList.remove('hidden');
       if (leafletCanvas) leafletCanvas.classList.add('hidden');
-      if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
-      initNaverMap();
-      setTimeout(() => fitNaverMapBounds(), 120);
+      if (mapEngineLabel) mapEngineLabel.textContent = 'Leaflet (오픈맵)';
+      if (btnToggle) btnToggle.title = '클릭 시 Leaflet 오픈맵으로 전환';
+
+      if (window.naver && window.naver.maps) {
+        initNaverMap();
+        updateNaverMapMarkers();
+        setTimeout(() => {
+          if (naverMap) {
+            naverMap.autoResize();
+            fitNaverMapBounds();
+          }
+        }, 120);
+      } else {
+        loadNaverMapSdk(naverClientId || 'tnm1g865f5').then((ok) => {
+          if (ok && currentMapEngine === 'naver') {
+            initNaverMap();
+            updateNaverMapMarkers();
+            setTimeout(() => {
+              if (naverMap) {
+                naverMap.autoResize();
+                fitNaverMapBounds();
+              }
+            }, 120);
+          } else {
+            // 네이버 지도 로드 실패 시 안전하게 Leaflet으로 폴백
+            currentMapEngine = 'leaflet';
+            if (naverCanvas) naverCanvas.classList.add('hidden');
+            if (leafletCanvas) leafletCanvas.classList.remove('hidden');
+            if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
+            if (btnToggle) btnToggle.title = '클릭 시 네이버 공식 지도로 전환';
+            initLeafletMap();
+            updateMapMarkers();
+            setTimeout(() => {
+              if (leafletMap) {
+                leafletMap.invalidateSize();
+                fitMapBounds();
+              }
+            }, 120);
+          }
+        });
+      }
     } else {
-      currentMapEngine = 'leaflet';
       if (naverCanvas) naverCanvas.classList.add('hidden');
       if (leafletCanvas) leafletCanvas.classList.remove('hidden');
-      if (mapEngineLabel) mapEngineLabel.textContent = 'Leaflet (오픈맵)';
+      if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
+      if (btnToggle) btnToggle.title = '클릭 시 네이버 공식 지도로 전환';
       initLeafletMap();
       updateMapMarkers();
       setTimeout(() => {
@@ -1644,7 +1673,8 @@ if (btnToggleMapEngine) {
       currentMapEngine = 'naver';
       if (leafletCanvas) leafletCanvas.classList.add('hidden');
       if (naverCanvas) naverCanvas.classList.remove('hidden');
-      if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
+      if (mapEngineLabel) mapEngineLabel.textContent = 'Leaflet (오픈맵)';
+      btnToggleMapEngine.title = '클릭 시 Leaflet 오픈맵으로 전환';
 
       const ok = initNaverMap();
       if (ok !== false) {
@@ -1655,14 +1685,15 @@ if (btnToggleMapEngine) {
             fitNaverMapBounds();
           }
         }, 150);
-        showToast('네이버 지도 엔진으로 전환되었습니다.');
+        showToast('네이버 공식 지도 엔진으로 전환되었습니다.');
       }
     } else {
       // 네이버 지도 -> Leaflet 오픈맵 엔진으로 전환
       currentMapEngine = 'leaflet';
       if (naverCanvas) naverCanvas.classList.add('hidden');
       if (leafletCanvas) leafletCanvas.classList.remove('hidden');
-      if (mapEngineLabel) mapEngineLabel.textContent = 'Leaflet (오픈맵)';
+      if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
+      btnToggleMapEngine.title = '클릭 시 네이버 공식 지도로 전환';
 
       initLeafletMap();
       updateMapMarkers();

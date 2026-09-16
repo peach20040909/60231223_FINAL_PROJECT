@@ -960,58 +960,26 @@ body {
   flex-shrink: 0;
 }
 
-/* 상호명 텍스트 (명확한 고대비, 깔끔한 말줄임) */
+/* 상호명(가게명) 텍스트: 숫자 배지 옆에 가게명이 선명하게 상시 표출 */
 .marker-title {
+  display: inline-block !important;
   font-size: 12px;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.3px;
-  max-width: 84px;
+  max-width: 95px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
-/* 🎯 네이버 지도급 스마트 컴팩트 모드 (줌 16.5 이하에서 마커 겹침 100% 방지 & 렉 제로 60fps) */
-.compact-markers .map-place-marker {
-  padding: 2px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
-  border: 1.5px solid #ffffff;
-}
-.compact-markers .map-place-marker .marker-title {
-  display: none;
-}
-.compact-markers .map-place-marker .marker-level-badge {
-  width: 22px;
-  height: 22px;
-  font-size: 11px;
-  font-weight: 800;
-}
-.compact-markers .map-place-marker:hover,
-.compact-markers .map-marker-anchor-wrap:hover .map-place-marker {
-  padding: 3px 10px 3px 3px;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
-  border-color: #2563eb;
-  z-index: 99999;
-}
-.compact-markers .map-place-marker:hover .marker-title,
-.compact-markers .map-marker-anchor-wrap:hover .marker-title {
-  display: inline-block;
-  max-width: 140px;
-  margin-left: 2px;
-  color: #0f172a;
-}
-  max-width: 120px;
-  opacity: 1;
-  margin-left: 4px;
-  pointer-events: auto;
-}
-.compact-markers .map-marker-anchor-wrap:hover {
-  z-index: 99999 !important;
+/* 마우스 호버 및 클릭 시: 상호명 전체 확장 및 강조 */
+.map-marker-anchor-wrap:hover .marker-title,
+.map-marker-anchor-wrap.hover .marker-title,
+.map-marker-anchor-wrap.active .marker-title {
+  max-width: 180px;
+  color: #1e3a8a;
 }
 
 /* 레벨별 테마 색상 (배지 배경 및 테두리 은은한 액센트) */
