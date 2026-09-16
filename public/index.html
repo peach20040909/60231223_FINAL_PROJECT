@@ -69,6 +69,7 @@
               value="혼밥"
               autocomplete="off"
             />
+            <button type="button" id="btn-search-clear" class="btn-input-clear" title="검색어 지우기" aria-label="검색어 지우기">&times;</button>
           </div>
           <button type="submit" class="search-submit-btn">식당 찾기</button>
         </form>
@@ -147,14 +148,29 @@
           <span id="catalog-count" class="catalog-count">0곳</span>
         </div>
 
-        <!-- 뷰 모드 전환 (목록 보기 vs 지도로 보기) -->
-        <div class="view-switch-tabs">
-          <button type="button" id="btn-view-list" class="view-tab-btn active">
-            <span class="v-icon">📋</span> 목록 보기
-          </button>
-          <button type="button" id="btn-view-map" class="view-tab-btn">
-            <span class="v-icon">🗺️</span> 지도로 보기
-          </button>
+        <!-- 상단 우측 컨트롤 바: 정렬 드롭다운 & 뷰 모드 전환 -->
+        <div class="catalog-controls-group">
+          <!-- ⚡ 거리순/난이도순/리뷰순 다차원 정렬 드롭다운 -->
+          <div class="sort-selector-wrap">
+            <span class="sort-icon">⚡</span>
+            <select id="sort-select" class="sort-select" title="식당 정렬 기준 선택">
+              <option value="distance">🚶‍♂️ 거리순 (가까운 순)</option>
+              <option value="level-asc">🔰 난이도 낮은 순 (Lv.1→5)</option>
+              <option value="level-desc">🥩 난이도 높은 순 (Lv.5→1)</option>
+              <option value="reviews">💬 리뷰 많은 순</option>
+              <option value="name">🔤 이름순</option>
+            </select>
+          </div>
+
+          <!-- 뷰 모드 전환 (목록 보기 vs 지도로 보기) -->
+          <div class="view-switch-tabs">
+            <button type="button" id="btn-view-list" class="view-tab-btn active">
+              <span class="v-icon">📋</span> 목록 보기
+            </button>
+            <button type="button" id="btn-view-map" class="view-tab-btn">
+              <span class="v-icon">🗺️</span> 지도로 보기
+            </button>
+          </div>
         </div>
 
         <!-- 필터 탭 -->
@@ -178,7 +194,7 @@
 
       <!-- 2) 인터랙티브 네이버 순정 지도 뷰 (기본 숨김) -->
       <div id="map-view-container" class="map-view-container hidden">
-        <!-- 지도 플로팅 컨트롤 바 (명지대, 명지전문대, 백련시장, 전체 권역 맞춤, 전체화면) -->
+        <!-- 지도 플로팅 컨트롤 바 (명지대, 명지전문대, 백련시장, 전체 권역 맞춤, 지도 엔진 전환, 전체화면) -->
         <div class="map-floating-controls">
           <button type="button" id="btn-map-center-mju" class="map-ctrl-btn" title="명지대학교 인문캠퍼스 중심으로 이동">
             📍 명지대
@@ -191,6 +207,9 @@
           </button>
           <button type="button" id="btn-map-fit-bounds" class="map-ctrl-btn active-fit" title="명지대 · 명지전문대 · 백련시장 전체 식당을 한 화면에 맞춤">
             🎯 전체 권역 맞춤
+          </button>
+          <button type="button" id="btn-toggle-map-engine" class="map-ctrl-btn engine-toggle-btn" title="네이버 지도 ↔ Leaflet 기본 지도 전환">
+            🌐 <span id="map-engine-label">네이버 지도</span>
           </button>
           <button type="button" id="btn-map-fullscreen" class="map-ctrl-btn fullscreen-btn" title="지도를 화면 가득 크게 보기">
             <span class="fs-icon">⛶</span> <span class="fs-text">전체화면</span>
@@ -226,6 +245,13 @@
 
         <div id="roulette-card-slot" class="roulette-card-slot">
           <!-- 롤링 중 혹은 당첨 식당 정보 -->
+        </div>
+
+        <div class="roulette-options">
+          <label class="roulette-opt-label">
+            <input type="checkbox" id="roulette-filter-scoped" />
+            <span>현재 선택된 난이도 필터 범위 내에서만 추천하기</span>
+          </label>
         </div>
 
         <div class="roulette-footer-actions">
@@ -291,6 +317,32 @@
           <button type="button" id="btn-submit-review" class="btn-submit">
             리뷰 등록하기
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 학우 리뷰 전체보기 및 삭제 모달 -->
+  <div id="reviews-list-modal" class="modal-overlay hidden">
+    <div class="modal-sheet reviews-list-sheet">
+      <div class="modal-top">
+        <span class="modal-tag">💬 학우 실시간 혼밥 팁</span>
+        <button type="button" id="reviews-list-close" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="reviews-list-header">
+          <div class="reviews-header-info">
+            <h3 id="reviews-list-place-name" class="modal-place-title">식당명</h3>
+            <p id="reviews-list-place-addr" class="modal-place-addr">식당 주소</p>
+          </div>
+          <button type="button" id="btn-write-review-shortcut" class="btn-primary-action btn-shortcut-review">
+            ✏️ 새 리뷰 작성
+          </button>
+        </div>
+
+        <div id="reviews-list-container" class="reviews-items-container">
+          <!-- 자바스크립트로 전체 리뷰가 렌더링됩니다 -->
         </div>
       </div>
     </div>

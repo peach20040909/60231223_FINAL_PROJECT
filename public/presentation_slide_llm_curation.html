@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>식당 설명 큐레이션 진화: 하드코딩 일괄 문구에서 LLM 맞춤 가이드로</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    body {
+      width: 1920px;
+      height: 1080px;
+      background: #F8FAFC;
+      color: #0F172A;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 48px 60px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+    }
+    .title-area h1 {
+      font-size: 34px;
+      font-weight: 800;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title-area h1 .badge {
+      font-size: 16px;
+      font-weight: 700;
+      background: #F5F3FF;
+      color: #7C3AED;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      border: 1px solid #DDD6FE;
+    }
+    .title-area p {
+      margin-top: 8px;
+      font-size: 18px;
+      color: #64748B;
+      font-weight: 500;
+    }
+    .team-badge {
+      font-size: 16px;
+      font-weight: 600;
+      color: #94A3B8;
+      background: #FFFFFF;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      flex: 1;
+    }
+
+    /* Column Styles */
+    .col {
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border-radius: 20px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
+      padding: 32px;
+    }
+    .col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .col-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tag {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .tag-before {
+      background: #FEE2E2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+    }
+    .tag-after {
+      background: #EDE9FE;
+      color: #6D28D9;
+      border: 1px solid #DDD6FE;
+    }
+    .col-title h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+    .col-desc {
+      font-size: 15px;
+      color: #64748B;
+      font-weight: 500;
+    }
+
+    /* Demonstration Area */
+    .demo-box {
+      background: #F8FAFC;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .demo-item {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 14px 18px;
+      border: 1px solid #E2E8F0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .demo-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .store-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .store-cat {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: normal;
+    }
+    .level-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    .desc-bubble {
+      font-size: 13.5px;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .desc-bubble.identical {
+      background: #FFFBEB;
+      border: 1px dashed #F59E0B;
+      color: #B45309;
+      position: relative;
+    }
+    .mismatch-alert {
+      font-size: 11px;
+      color: #DC2626;
+      font-weight: 700;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .desc-bubble.llm-custom {
+      background: #F5F3FF;
+      border: 1px solid #DDD6FE;
+      color: #5B21B6;
+    }
+    .tag-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .llm-tag {
+      font-size: 11px;
+      background: #EDE9FE;
+      color: #6D28D9;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* Bullet Point Highlights */
+    .point-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .point-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .point-item.bad {
+      background: #FEF2F2;
+      border: 1px solid #FEE2E2;
+      color: #991B1B;
+    }
+    .point-item.bad .icon {
+      color: #EF4444;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .point-item.good {
+      background: #FAF5FF;
+      border: 1px solid #F3E8FF;
+      color: #581C87;
+    }
+    .point-item.good .icon {
+      color: #8B5CF6;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .point-text strong {
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 24px;
+      background: #0F172A;
+      color: #F8FAFC;
+      padding: 18px 28px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .footer-title {
+      font-size: 15px;
+      font-weight: 700;
+      background: #7C3AED;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .footer-script {
+      font-size: 16px;
+      font-weight: 500;
+      color: #E2E8F0;
+    }
+    .footer-right {
+      font-size: 14px;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-area">
+      <h1>
+        식당 설명 큐레이션 AI 고도화
+        <span class="badge">LLM Prompt Engineering Case Study</span>
+      </h1>
+      <p>하드코딩된 레벨별 획일적 복붙 문구에서 Gemini LLM 기반 93개 식당별 초개인화 가이드로의 도약</p>
+    </div>
+    <div class="team-badge">명지대학교 고급웹프로그래밍 Final Project</div>
+  </header>
+
+  <div class="comparison-grid">
+    <!-- BEFORE: Hardcoded Level Text -->
+    <div class="col">
+      <div class="col-header">
+        <div class="col-title">
+          <span class="tag tag-before">BEFORE</span>
+          <h2>레벨(Lv)별 하드코딩 일괄 문구</h2>
+        </div>
+        <span class="col-desc">초기 구현 방식 (Rule-based)</span>
+      </div>
+
+      <div class="demo-box">
+        <!-- Store 1: 샘분식 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">샘분식 <span class="store-cat">(분식)</span></span>
+            <span class="level-badge">Lv.3 일반 밥집</span>
+          </div>
+          <div class="desc-bubble identical">
+            "정갈한 밑반찬과 집밥 느낌 가득한 따뜻한 한 끼! 든든하고 속 편한 점심 식사로 딱이에요."
+          </div>
+        </div>
+
+        <!-- Store 2: 대흥떡집 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">대흥떡집 <span class="store-cat">(간식/떡)</span></span>
+            <span class="level-badge">Lv.3 일반 밥집</span>
+          </div>
+          <div class="desc-bubble identical">
+            "정갈한 밑반찬과 집밥 느낌 가득한 따뜻한 한 끼! 든든하고 속 편한 점심 식사로 딱이에요."
+          </div>
+          <div class="mismatch-alert">⚠️ 오류: 떡집인데 '정갈한 밑반찬과 집밥' 문구가 그대로 출력됨</div>
+        </div>
+
+        <!-- Store 3: 핫바비큐 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">핫바비큐 <span class="store-cat">(치킨/바비큐)</span></span>
+            <span class="level-badge">Lv.3 일반 밥집</span>
+          </div>
+          <div class="desc-bubble identical">
+            "정갈한 밑반찬과 집밥 느낌 가득한 따뜻한 한 끼! 든든하고 속 편한 점심 식사로 딱이에요."
+          </div>
+          <div class="mismatch-alert">⚠️ 오류: 치킨집인데 떡집·분식집과 완전히 똑같은 문구 복붙</div>
+        </div>
+      </div>
+
+      <div class="point-list">
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>동일 레벨 내 모든 식당(수십 곳)이 완전히 동일한 문구 공유</strong><br>
+            같은 Lv.3이면 백반집, 떡집, 치킨집 가리지 않고 똑같은 텍스트가 복붙되어 실질적 정보 가치 0%
+          </div>
+        </div>
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>업종과 전혀 맞지 않는 텍스트 오류 발생</strong><br>
+            간식/디저트/치킨집에 '밑반찬과 점심 밥상'이라는 엉뚱한 문구가 출력되어 신뢰도 하락
+          </div>
+        </div>
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>식당 고유의 대표 메뉴와 1인석 특성 반영 불가</strong><br>
+            1인 바 테이블, 무한리필, 키오스크 유무 등 혼밥러가 진짜 알고 싶은 매장 정보 부재
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER: Gemini LLM Personalized Curation -->
+    <div class="col">
+      <div class="col-header">
+        <div class="col-title">
+          <span class="tag tag-after">AFTER</span>
+          <h2>Gemini LLM 93개 식당별 초개인화 가이드</h2>
+        </div>
+        <span class="col-desc">현재 완성형 (AI 파이프라인 구축)</span>
+      </div>
+
+      <div class="demo-box">
+        <!-- Store 1: 치즈밥있슈 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">치즈밥있슈 명지대점 <span class="store-cat">(분식)</span></span>
+            <span class="level-badge" style="background:#EFF6FF; color:#2563EB;">Lv.2 혼밥 성지</span>
+          </div>
+          <div class="desc-bubble llm-custom">
+            "지글지글 달궈진 뚝배기에 치즈와 날치알, 김치가 듬뿍! 학창 시절 추억을 떠올리며 혼자 쓱쓱 비벼먹는 힐링 밥집."
+          </div>
+          <div class="tag-row">
+            <span class="llm-tag">#치즈날치알밥</span>
+            <span class="llm-tag">#뚝배기지글지글</span>
+            <span class="llm-tag">#단짠김치밥</span>
+          </div>
+        </div>
+
+        <!-- Store 2: 킹콩부대찌개 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">킹콩부대찌개 명지대점 <span class="store-cat">(한식)</span></span>
+            <span class="level-badge">Lv.3 일반 밥집</span>
+          </div>
+          <div class="desc-bubble llm-custom">
+            "1인 부대찌개 주문 대환영에 라면사리·밥 무한리필! 진한 육수에 혼자서도 배터지게 든든한 탄수화물 충전."
+          </div>
+          <div class="tag-row">
+            <span class="llm-tag">#1인부대찌개환영</span>
+            <span class="llm-tag">#라면사리무한</span>
+            <span class="llm-tag">#공기밥무한</span>
+          </div>
+        </div>
+
+        <!-- Store 3: 가타쯔무리 -->
+        <div class="demo-item">
+          <div class="demo-item-header">
+            <span class="store-name">가타쯔무리 <span class="store-cat">(일식)</span></span>
+            <span class="level-badge" style="background:#EFF6FF; color:#2563EB;">Lv.2 혼밥 성지</span>
+          </div>
+          <div class="desc-bubble llm-custom">
+            "일본인 장인이 매일 직접 뽑는 쫄깃탱글한 사누키 자가제면 우동! 조용한 카운터석에서 오롯이 면발의 풍미에 집중."
+          </div>
+          <div class="tag-row">
+            <span class="llm-tag">#정통사누키우동</span>
+            <span class="llm-tag">#자가제면맛집</span>
+            <span class="llm-tag">#오픈런명소</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="point-list">
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>LLM(Gemini) 파이프라인으로 93개 식당 전수 1:1 맞춤 생성</strong><br>
+            식당의 실제 대표 메뉴(치즈밥, 뚝배기, 수제우동 등)와 매장 분위기를 반영한 차별화된 스토리텔링
+          </div>
+        </div>
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>혼밥러 눈높이에 맞춘 심리적 장벽 완화 팁 제공</strong><br>
+            '1인 주문 가능 여부', '무한리필 정보', '카운터 다찌석 유무' 등 실질적 혼밥 행동 팁 완벽 제시
+          </div>
+        </div>
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>정밀 키워드 5종(#) 자동 태깅 연계</strong><br>
+            설명 문구뿐 아니라 학우들이 빠르게 스캔할 수 있는 핵심 해시태그까지 LLM으로 일관성 있게 구성
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <span class="footer-title">발표 멘트 추천</span>
+      <span class="footer-script">"초기 버전에서는 레벨별로 하나의 고정 문구만 지정하여 떡집이나 치킨집에도 '집밥 밑반찬'이라는 엉뚱한 설명이 붙는 한계가 있었습니다. 이를 극복하기 위해 Gemini LLM 파이프라인을 구축하여 명지대 앞 93개 식당 전수의 실제 메뉴와 1인석 특성을 반영한 100% 개별 맞춤 심리 가이드를 생성했습니다."</span>
+    </div>
+    <div class="footer-right">AI-Powered Content Curation</div>
+  </footer>
+</body>
+</html>

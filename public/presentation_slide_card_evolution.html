@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>혼밥지도 카드 UI 개선 전후 비교</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    body {
+      width: 1920px;
+      height: 1080px;
+      background: #F8FAFC;
+      color: #0F172A;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 48px 60px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+    }
+    .title-area h1 {
+      font-size: 34px;
+      font-weight: 800;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title-area h1 .badge {
+      font-size: 16px;
+      font-weight: 700;
+      background: #EFF6FF;
+      color: #2563EB;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      border: 1px solid #BFDBFE;
+    }
+    .title-area p {
+      margin-top: 8px;
+      font-size: 18px;
+      color: #64748B;
+      font-weight: 500;
+    }
+    .team-badge {
+      font-size: 16px;
+      font-weight: 600;
+      color: #94A3B8;
+      background: #FFFFFF;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      flex: 1;
+    }
+
+    /* BEFORE / AFTER Column */
+    .col {
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border-radius: 20px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
+      padding: 32px;
+    }
+    .col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .col-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .col-title .tag {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .tag-before {
+      background: #FEE2E2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+    }
+    .tag-after {
+      background: #DCFCE7;
+      color: #16A34A;
+      border: 1px solid #BBF7D0;
+    }
+    .col-title h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+    .col-desc {
+      font-size: 15px;
+      color: #64748B;
+      font-weight: 500;
+    }
+
+    /* Cards Preview Area */
+    .preview-box {
+      background: #F1F5F9;
+      border-radius: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+      border: 1px solid #E2E8F0;
+    }
+
+    /* Mini Restaurant Card Style */
+    .mini-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid #E2E8F0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Before Card Elements */
+    .before-img-box {
+      height: 120px;
+      position: relative;
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+    .before-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .broken-img {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background: #F8FAFC;
+      color: #94A3B8;
+      font-size: 13px;
+      gap: 6px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .broken-icon {
+      font-size: 24px;
+      color: #CBD5E1;
+    }
+    .error-pin {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(220, 38, 38, 0.9);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .card-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-cat {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+    .card-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .tag-pill {
+      font-size: 11px;
+      background: #F8FAFC;
+      color: #64748B;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #E2E8F0;
+    }
+
+    /* After Card Elements */
+    .after-card-top {
+      padding: 14px 16px 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .emoji-icon-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #FFF7ED;
+      border: 1px solid #FED7AA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .emoji-icon-badge.soup {
+      background: #EFF6FF;
+      border-color: #BFDBFE;
+    }
+    .after-header-text {
+      flex: 1;
+    }
+    .difficulty-strip {
+      margin: 4px 16px 10px 16px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .difficulty-tag {
+      font-size: 11px;
+      font-weight: 800;
+      background: #F59E0B;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .difficulty-desc {
+      font-size: 11px;
+      color: #92400E;
+      font-weight: 600;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Bullet Point Highlights */
+    .point-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .point-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .point-item.bad {
+      background: #FEF2F2;
+      border: 1px solid #FEE2E2;
+      color: #991B1B;
+    }
+    .point-item.bad .icon {
+      color: #EF4444;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .point-item.good {
+      background: #F0FDF4;
+      border: 1px solid #DCFCE7;
+      color: #166534;
+    }
+    .point-item.good .icon {
+      color: #22C55E;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .point-text strong {
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    /* Presentation Storyline Footer */
+    footer {
+      margin-top: 24px;
+      background: #0F172A;
+      color: #F8FAFC;
+      padding: 18px 28px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .footer-title {
+      font-size: 15px;
+      font-weight: 700;
+      background: #FF5A36;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .footer-script {
+      font-size: 16px;
+      font-weight: 500;
+      color: #E2E8F0;
+    }
+    .footer-right {
+      font-size: 14px;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-area">
+      <h1>
+        식당 정보 카드 UI/UX 진화 과정
+        <span class="badge">Problem-Solving Case Study</span>
+      </h1>
+      <p>불일치 스톡 사진 표지의 한계를 극복하고, 맞춤형 3D 이모티콘 뱃지와 심리적 혼밥 가이드로 전환한 설계 의도</p>
+    </div>
+    <div class="team-badge">명지대학교 고급웹프로그래밍 Final Project</div>
+  </header>
+
+  <div class="comparison-grid">
+    <!-- BEFORE COLUMN -->
+    <div class="col">
+      <div class="col-header">
+        <div class="col-title">
+          <span class="tag tag-before">BEFORE</span>
+          <h2>외부 스톡 사진 표지 방식</h2>
+        </div>
+        <span class="col-desc">초기 구현 단계 (Commit 60943fa)</span>
+      </div>
+
+      <!-- Preview Cards -->
+      <div class="preview-box">
+        <!-- Card 1: 치즈밥있슈 (엉뚱한 고기볶음) -->
+        <div class="mini-card">
+          <div class="before-img-box">
+            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80" alt="치즈밥있슈">
+            <div class="error-pin">⚠️ 메뉴 불일치</div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">음식점 > 분식</div>
+            <div class="card-name">치즈밥있슈 명지대점</div>
+            <div class="card-tags">
+              <span class="tag-pill">#1인석많음</span>
+              <span class="tag-pill">#키오스크</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: 쏘울푸드 (엑박) -->
+        <div class="mini-card">
+          <div class="before-img-box">
+            <div class="broken-img">
+              <div class="broken-icon">❌ 🖼️</div>
+              <span>쏘울푸드 (이미지 깨짐)</span>
+            </div>
+            <div class="error-pin">⚠️ 엑박 에러</div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">음식점 > 한식</div>
+            <div class="card-name">쏘울푸드</div>
+            <div class="card-tags">
+              <span class="tag-pill">#2인석착석</span>
+              <span class="tag-pill">#셀프바</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bullet Points -->
+      <div class="point-list">
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>실제 메뉴와 100% 불일치하는 스톡 사진</strong><br>
+            치즈밥 전문점인데 닭강정/꼬치구이 사진이 뜨는 등 사용자에게 혼란과 잘못된 기대감 유발
+          </div>
+        </div>
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>동일 카테고리 식당의 중복 사진 문제</strong><br>
+            한식 카테고리의 서로 다른 식당들이 완전히 동일한 된장찌개 사진을 공유해 식당 식별 불가
+          </div>
+        </div>
+        <div class="point-item bad">
+          <div class="icon">✕</div>
+          <div class="point-text">
+            <strong>외부 호스팅 의존으로 흉측한 엑박(Broken Image) 발생</strong><br>
+            외부 Unsplash 이미지 링크 만료, CORS, 트래픽 제한 시 화면 절반이 엑박으로 채워짐
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER COLUMN -->
+    <div class="col">
+      <div class="col-header">
+        <div class="col-title">
+          <span class="tag tag-after">AFTER</span>
+          <h2>3D 이모티콘 뱃지 + 심리적 가이드</h2>
+        </div>
+        <span class="col-desc">현재 완성형 (v2.0 Modern UX)</span>
+      </div>
+
+      <!-- Preview Cards -->
+      <div class="preview-box">
+        <!-- Card 1: 샘분식 -->
+        <div class="mini-card">
+          <div class="after-card-top">
+            <div class="emoji-icon-badge">🥪</div>
+            <div class="after-header-text">
+              <div class="card-cat">음식점 > 분식 · 도보 1분</div>
+              <div class="card-name">샘분식</div>
+            </div>
+          </div>
+          <div class="difficulty-strip">
+            <span class="difficulty-tag">Lv.3 일반 밥집</span>
+            <span class="difficulty-desc">정갈한 밑반찬과 집밥 느낌! 속 편한 점심</span>
+          </div>
+          <div class="card-body" style="padding-top:0;">
+            <div class="card-tags">
+              <span class="tag-pill">#집밥감성</span>
+              <span class="tag-pill">#푸짐한반찬</span>
+              <span class="tag-pill">#학생단골</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: 백년순대국 -->
+        <div class="mini-card">
+          <div class="after-card-top">
+            <div class="emoji-icon-badge soup">🍲</div>
+            <div class="after-header-text">
+              <div class="card-cat">음식점 > 한식 > 국밥 · 도보 1분</div>
+              <div class="card-name">백년순대국</div>
+            </div>
+          </div>
+          <div class="difficulty-strip" style="background:#EFF6FF; border-color:#BFDBFE;">
+            <span class="difficulty-tag" style="background:#2563EB;">Lv.2 혼밥 성지</span>
+            <span class="difficulty-desc" style="color:#1E40AF;">주문하자마자 끓어오르는 뚝배기!</span>
+          </div>
+          <div class="card-body" style="padding-top:0;">
+            <div class="card-tags">
+              <span class="tag-pill">#한국인소울푸드</span>
+              <span class="tag-pill">#뚝배기</span>
+              <span class="tag-pill">#공기밥무한</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bullet Points -->
+      <div class="point-list">
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>직관적인 3D 카테고리 이모티콘 뱃지 도입</strong><br>
+            샌드위치(🥪), 국밥(🍲), 치킨(🍗), 면류(🍜) 등 업종을 즉각 인지할 수 있는 파스텔 뱃지화
+          </div>
+        </div>
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>엑박 오류 0% & 네트워크 트래픽 제로(Zero-Cost)</strong><br>
+            외부 이미지 로딩 의존성을 완전히 제거하여 초고속 렌더링 및 100% 무장애 안정성 달성
+          </div>
+        </div>
+        <div class="point-item good">
+          <div class="icon">✓</div>
+          <div class="point-text">
+            <strong>정보 밀도 극대화: 심리적 혼밥 가이드 배너 배치</strong><br>
+            불필요한 사진 영역을 줄이고 학우들이 가장 궁금해하는 '난이도별 상황 문구'와 '팁'을 상단 배치
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <span class="footer-title">발표 멘트 추천</span>
+      <span class="footer-script">"초기에는 음식 사진을 카드 표지에 넣었으나 카테고리별 중복과 실제 메뉴 불일치 문제, 그리고 엑박 오류가 빈번했습니다. 이를 과감히 덜어내고 경량화된 3D 이모티콘 뱃지와 혼밥 가이드 배너로 전환하여 정보 전달력과 UI 완성도를 대폭 끌어올렸습니다."</span>
+    </div>
+    <div class="footer-right">혼밥지도 (SoloMap) UX 개선 사례</div>
+  </footer>
+</body>
+</html>

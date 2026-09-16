@@ -113,12 +113,12 @@ export async function getPlaceCuration(place: {
       let response;
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
         });
       } catch (mErr) {
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
         });
       }

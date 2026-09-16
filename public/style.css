@@ -614,6 +614,151 @@ body {
   display: none;
 }
 
+/* ===================================================
+   🗺️ 네이버 지도 스타일 정밀 줌 슬라이더 컨트롤러 & 축척 바
+   =================================================== */
+/* 기본 Leaflet 줌 버튼 숨기기 (더 아름다운 네이버 스타일로 대체) */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+/* 네이버 지도 스타일 세로형 줌 슬라이더 컨트롤러 */
+.naver-style-zoom-control {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.naver-zoom-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.naver-zoom-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.naver-zoom-btn:active {
+  background: #e2e8f0;
+}
+
+/* 줌 슬라이더 트랙 바 */
+.naver-zoom-slider-track {
+  width: 32px;
+  height: 104px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.naver-zoom-track-line {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+.naver-zoom-ticks {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.naver-zoom-tick {
+  position: absolute;
+  left: 10px;
+  width: 12px;
+  height: 1.5px;
+  background: #cbd5e1;
+  transform: translateY(-50%);
+}
+.naver-zoom-track-fill {
+  position: absolute;
+  bottom: 10px;
+  width: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+  transition: height 0.08s ease-out;
+}
+.naver-zoom-handle {
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.45);
+  transform: translate(-50%, 50%);
+  cursor: grab;
+  transition: bottom 0.08s ease-out, transform 0.15s ease;
+  z-index: 2;
+}
+.naver-zoom-handle:hover,
+.naver-zoom-handle:active {
+  transform: translate(-50%, 50%) scale(1.2);
+  background: #1d4ed8;
+  cursor: grabbing;
+}
+.naver-zoom-tooltip {
+  position: absolute;
+  left: 38px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.naver-zoom-slider-track:hover .naver-zoom-tooltip {
+  opacity: 1;
+}
+
+/* 네이버 스타일 실시간 거리 축척 바 */
+.leaflet-control-scale-line {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1.5px solid #64748b !important;
+  border-top: none !important;
+  color: #1e293b !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 2px 6px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 0 0 4px 4px !important;
+  font-family: 'Pretendard', sans-serif !important;
+}
+
 /* 지도 전체화면(Fullscreen) 모드 */
 .map-view-container.fullscreen {
   position: fixed !important;
@@ -746,12 +891,14 @@ body {
 .legend-dot.lv5 { background: var(--lv5-color); }
 
 /* ===================================================
-   🗺️ 모던 캡슐 필(Pill) 지도 마커 스타일 (PC & 모바일 상호명 식별 개선)
+   🗺️ 모던 캡슐 필(Pill) & 도트 지도 마커 스타일 (네이버 지도급 60fps 고속 최적화)
    =================================================== */
 .custom-div-icon,
 .custom-leaflet-marker-icon {
   background: transparent !important;
   border: none !important;
+  contain: layout style;
+  will-change: transform;
 }
 
 /* 마커 앵커 래퍼: 좌표 기준 정중앙 하단 포인터가 정확히 지도 좌표를 가리키도록 정렬 */
@@ -765,7 +912,7 @@ body {
   white-space: nowrap;
   user-select: none;
   z-index: 100;
-  transition: z-index 0.15s ease;
+  contain: layout style;
 }
 
 /* 식당 캡슐 마커 본체: [Lv 배지] + [상호명] 한눈에 확인 */
@@ -776,11 +923,11 @@ body {
   background: #ffffff;
   padding: 3px 8px 3px 3px;
   border-radius: 20px;
-  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.22), 0 1px 3px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
   border: 1.5px solid #e2e8f0;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease;
   position: relative;
+  contain: layout style;
 }
 
 /* 하단 뾰족한 포인터 화살표 (지도 위치 정확 조준) */
@@ -795,7 +942,7 @@ body {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 6px solid #ffffff;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.12));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 
 /* 레벨 원형 배지 (1~5 색상 뚜렷하게 구분) */
@@ -811,7 +958,6 @@ body {
   font-weight: 800;
   line-height: 1;
   flex-shrink: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 /* 상호명 텍스트 (명확한 고대비, 깔끔한 말줄임) */
@@ -824,6 +970,48 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 🎯 네이버 지도급 스마트 컴팩트 모드 (줌 16.5 이하에서 마커 겹침 100% 방지 & 렉 제로 60fps) */
+.compact-markers .map-place-marker {
+  padding: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+  border: 1.5px solid #ffffff;
+}
+.compact-markers .map-place-marker .marker-title {
+  display: none;
+}
+.compact-markers .map-place-marker .marker-level-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.compact-markers .map-place-marker:hover,
+.compact-markers .map-marker-anchor-wrap:hover .map-place-marker {
+  padding: 3px 10px 3px 3px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
+  border-color: #2563eb;
+  z-index: 99999;
+}
+.compact-markers .map-place-marker:hover .marker-title,
+.compact-markers .map-marker-anchor-wrap:hover .marker-title {
+  display: inline-block;
+  max-width: 140px;
+  margin-left: 2px;
+  color: #0f172a;
+}
+  max-width: 120px;
+  opacity: 1;
+  margin-left: 4px;
+  pointer-events: auto;
+}
+.compact-markers .map-marker-anchor-wrap:hover {
+  z-index: 99999 !important;
 }
 
 /* 레벨별 테마 색상 (배지 배경 및 테두리 은은한 액센트) */
@@ -2605,3 +2793,268 @@ textarea:focus {
     font-size: 8px;
   }
 }
+
+/* ===================================================
+   신규 고도화 컴포넌트 스타일 (정렬, 클리어, 리뷰 모달, 주소 복사)
+   =================================================== */
+
+/* 1. 검색창 ✕ 지우기 버튼 */
+.btn-input-clear {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.btn-input-clear.visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-input-clear:hover {
+  color: var(--text-main);
+  transform: scale(1.15);
+}
+
+/* 2. 카탈로그 상단 우측 컨트롤 그룹 (정렬 + 뷰 전환) */
+.catalog-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 3. ⚡ 다차원 정렬 셀렉터 */
+.sort-selector-wrap {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid var(--border-light);
+  border-radius: 12px;
+  padding: 0 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+}
+.sort-selector-wrap:hover {
+  border-color: var(--border-focus);
+}
+.sort-selector-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 82, 38, 0.12);
+}
+.sort-icon {
+  font-size: 13px;
+  color: var(--primary);
+  margin-right: 4px;
+}
+.sort-select {
+  border: none;
+  background: transparent;
+  padding: 7px 2px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+/* 4. 카드 리뷰 영역 클릭 인터랙션 */
+.card-review-box.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-review-box.clickable:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  background: #f1f5f9;
+}
+.review-box-action-hint {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-left: 6px;
+  opacity: 0.9;
+}
+
+/* 5. 주소 복사 버튼 */
+.btn-copy-address {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 6px;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+}
+.btn-copy-address:hover {
+  background: #e2e8f0;
+  color: var(--text-main);
+  border-color: #cbd5e1;
+}
+.btn-copy-address:active {
+  transform: scale(0.95);
+}
+
+/* 6. 학우 리뷰 전체보기 및 삭제 모달 */
+.reviews-list-sheet {
+  max-width: 580px;
+  width: 92%;
+}
+.reviews-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 16px;
+}
+.reviews-header-info .modal-place-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.reviews-header-info .modal-place-addr {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+.btn-shortcut-review {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  border-radius: 10px;
+}
+.reviews-items-container {
+  max-height: 52vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+.review-item-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.review-item-card:hover {
+  border-color: #cbd5e1;
+}
+.review-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.review-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.review-item-date {
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+.btn-delete-review {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.btn-delete-review:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+.review-item-text {
+  font-size: 13.5px;
+  color: var(--text-main);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.reviews-empty-box {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-muted);
+}
+.reviews-empty-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+/* 7. 룰렛 모달 필터 옵션 */
+.roulette-options {
+  margin: 14px 0 16px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+}
+.roulette-opt-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+  user-select: none;
+}
+.roulette-opt-label input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* 8. 모바일 정렬 컨트롤 반응형 */
+@media (max-width: 768px) {
+  .catalog-controls-group {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .sort-selector-wrap {
+    flex: 1;
+  }
+  .sort-select {
+    width: 100%;
+    font-size: 11.5px;
+  }
+  .view-switch-tabs {
+    flex-shrink: 0;
+  }
+  .reviews-list-sheet {
+    border-radius: 24px 24px 0 0;
+    max-height: 85vh;
+    padding: 20px 16px max(24px, env(safe-area-inset-bottom));
+  }
+}
+
