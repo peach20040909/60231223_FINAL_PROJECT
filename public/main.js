@@ -1186,7 +1186,7 @@ let naverMap = null;
 let naverMarkers = [];
 let naverInfoWindows = [];
 let currentMapEngine = 'leaflet'; // 'leaflet' | 'naver' (기본값: Leaflet)
-let naverClientId = localStorage.getItem('solo_map_naver_client_id') || '';
+let naverClientId = localStorage.getItem('solo_map_naver_client_id') || 'tnm1g865f5';
 
 // 서버 환경변수(NAVER_CLIENT_ID) 확인 및 자동 네이버 지도 SDK 백그라운드 준비
 fetch('/api/config')
@@ -1198,13 +1198,13 @@ fetch('/api/config')
     }
     if (naverClientId) {
       await loadNaverMapSdk(naverClientId);
-      // 사용자 요청에 따라 기본 지도는 항상 부드럽고 렉 없는 'Leaflet'으로 유지합니다!
     }
   })
   .catch(() => {});
 
 function loadNaverMapSdk(clientId) {
   if (window.naver && window.naver.maps) return Promise.resolve(true);
+  const cid = clientId || naverClientId || 'tnm1g865f5';
   return new Promise((resolve) => {
     const existing = document.getElementById('naver-maps-sdk-script');
     if (existing) existing.remove();
@@ -1213,7 +1213,7 @@ function loadNaverMapSdk(clientId) {
     script.id = 'naver-maps-sdk-script';
     script.type = 'text/javascript';
     // ncpClientId와 ncpKeyId 둘 다 호환되도록 전달
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(clientId)}&ncpClientId=${encodeURIComponent(clientId)}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(cid)}&ncpClientId=${encodeURIComponent(cid)}`;
     script.onload = () => {
       console.log('🟢 네이버 지도 v3 SDK 로드 성공!');
       resolve(true);
@@ -1618,6 +1618,61 @@ if (btnMapFitBounds) {
       fitNaverMapBounds();
     } else {
       fitMapBounds();
+    }
+  });
+}
+
+// 🌐 네이버 지도 ↔ Leaflet 기본 지도 엔진 전환 토글
+const btnToggleMapEngine = document.getElementById('btn-toggle-map-engine');
+if (btnToggleMapEngine) {
+  btnToggleMapEngine.addEventListener('click', async () => {
+    const naverCanvas = document.getElementById('naver-map-canvas');
+    const leafletCanvas = document.getElementById('leaflet-map');
+    const mapEngineLabel = document.getElementById('map-engine-label');
+
+    if (currentMapEngine === 'leaflet') {
+      // Leaflet -> 네이버 지도 엔진으로 전환
+      if (!window.naver || !window.naver.maps) {
+        showToast('네이버 지도 SDK를 로드하고 있습니다...');
+        const loaded = await loadNaverMapSdk(naverClientId || 'tnm1g865f5');
+        if (!loaded) {
+          showToast('네이버 지도 로드 실패: NCP 콘솔에 도메인 등록이 필요합니다.');
+          return;
+        }
+      }
+
+      currentMapEngine = 'naver';
+      if (leafletCanvas) leafletCanvas.classList.add('hidden');
+      if (naverCanvas) naverCanvas.classList.remove('hidden');
+      if (mapEngineLabel) mapEngineLabel.textContent = '네이버 지도';
+
+      const ok = initNaverMap();
+      if (ok !== false) {
+        updateNaverMapMarkers();
+        setTimeout(() => {
+          if (naverMap) {
+            naverMap.autoResize();
+            fitNaverMapBounds();
+          }
+        }, 150);
+        showToast('네이버 지도 엔진으로 전환되었습니다.');
+      }
+    } else {
+      // 네이버 지도 -> Leaflet 오픈맵 엔진으로 전환
+      currentMapEngine = 'leaflet';
+      if (naverCanvas) naverCanvas.classList.add('hidden');
+      if (leafletCanvas) leafletCanvas.classList.remove('hidden');
+      if (mapEngineLabel) mapEngineLabel.textContent = 'Leaflet (오픈맵)';
+
+      initLeafletMap();
+      updateMapMarkers();
+      setTimeout(() => {
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+          fitMapBounds();
+        }
+      }, 150);
+      showToast('Leaflet 오픈맵 엔진으로 전환되었습니다.');
     }
   });
 }
