@@ -405,6 +405,7 @@ function getDynamicSoloIndex(place) {
    =================================================== */
 let currentPlaces = [];
 let currentFilter = 'all';
+let currentSort = 'distance'; // 'distance' | 'level-asc' | 'level-desc' | 'reviews' | 'name'
 let currentViewMode = 'list'; // 'list' | 'map'
 let targetReviewPlace = null;
 let leafletMap = null;
@@ -417,6 +418,7 @@ const placesContainer = document.getElementById('places-container');
 const mapViewContainer = document.getElementById('map-view-container');
 const catalogTitle = document.getElementById('catalog-title');
 const catalogCount = document.getElementById('catalog-count');
+const sortSelect = document.getElementById('sort-select');
 const kwChips = document.querySelectorAll('.kw-chip');
 const filterTabs = document.querySelectorAll('.tab-btn');
 const btnViewList = document.getElementById('btn-view-list');
@@ -494,20 +496,60 @@ async function loadPlaces(keyword) {
   }
 }
 
-// 필터링 계산
+// ⚡ 다차원 정렬 헬퍼 함수 (거리순, 난이도 낮은순/높은순, 리뷰순, 이름순)
+function sortPlacesList(list, sortBy = currentSort) {
+  const sorted = [...list];
+  sorted.sort((a, b) => {
+    const distA = Number(a.distance) || 999999;
+    const distB = Number(b.distance) || 999999;
+
+    if (sortBy === 'distance') {
+      return distA - distB;
+    }
+    if (sortBy === 'level-asc') {
+      const lvA = getDynamicSoloIndex(a).lv;
+      const lvB = getDynamicSoloIndex(b).lv;
+      if (lvA !== lvB) return lvA - lvB;
+      return distA - distB;
+    }
+    if (sortBy === 'level-desc') {
+      const lvA = getDynamicSoloIndex(a).lv;
+      const lvB = getDynamicSoloIndex(b).lv;
+      if (lvA !== lvB) return lvB - lvA;
+      return distA - distB;
+    }
+    if (sortBy === 'reviews') {
+      const revA = getPlaceReviews(a.id).length;
+      const revB = getPlaceReviews(b.id).length;
+      if (revA !== revB) return revB - revA;
+      return distA - distB;
+    }
+    if (sortBy === 'name') {
+      return (a.place_name || '').localeCompare(b.place_name || '', 'ko');
+    }
+    return 0;
+  });
+  return sorted;
+}
+
+// 필터링 및 다차원 정렬 통합 계산
 function getFilteredList() {
+  let list = [];
   if (currentFilter === 'fav') {
     const favs = getFavorites();
-    return currentPlaces.filter((p) => favs.includes(p.id));
+    list = currentPlaces.filter((p) => favs.includes(p.id));
+  } else if (currentFilter === 'all') {
+    list = currentPlaces;
+  } else {
+    const targetLv = Number(currentFilter);
+    list = currentPlaces.filter((p) => {
+      const info = getDynamicSoloIndex(p);
+      return info.lv === targetLv;
+    });
   }
-  if (currentFilter === 'all') {
-    return currentPlaces;
-  }
-  const targetLv = Number(currentFilter);
-  return currentPlaces.filter((p) => {
-    const info = getDynamicSoloIndex(p);
-    return info.lv === targetLv;
-  });
+
+  // ⚡ 선택된 정렬 기준(거리순, 난이도 낮은순/높은순, 리뷰순, 가나다순) 적용
+  return sortPlacesList(list, currentSort);
 }
 
 function renderFilteredPlaces() {
@@ -1595,6 +1637,28 @@ filterTabs.forEach((tab) => {
   });
 });
 
+// ⚡ 정렬 기준 변경 이벤트 (PC 및 모바일 터치 완벽 호환)
+if (sortSelect) {
+  const handleSortChange = () => {
+    currentSort = sortSelect.value;
+    renderFilteredPlaces();
+
+    const sortLabels = {
+      'distance': '🚶‍♂️ 가까운 거리순으로 정렬되었습니다.',
+      'level-asc': '🔰 난이도 낮은 순(Lv.1→5)으로 정렬되었습니다.',
+      'level-desc': '🥩 난이도 높은 순(Lv.5→1)으로 정렬되었습니다.',
+      'reviews': '💬 학우 리뷰 많은 순으로 정렬되었습니다.',
+      'name': '🔤 식당 가나다순으로 정렬되었습니다.',
+    };
+    if (sortLabels[currentSort]) {
+      showToast(sortLabels[currentSort]);
+    }
+  };
+
+  sortSelect.addEventListener('change', handleSortChange);
+  sortSelect.addEventListener('input', handleSortChange);
+}
+
 // XSS 방지 이스케이프
 function escapeHtml(str) {
   if (!str) return '';
@@ -1770,6 +1834,8 @@ function resetToHome(e) {
     c.classList.remove('active');
   });
   currentFilter = 'all';
+  currentSort = 'distance';
+  if (sortSelect) sortSelect.value = 'distance';
   switchViewMode('list');
   loadPlaces('혼밥');
   window.scrollTo({ top: 0, behavior: 'smooth' });

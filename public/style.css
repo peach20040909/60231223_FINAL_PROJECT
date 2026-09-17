@@ -479,6 +479,85 @@ body {
   color: var(--primary);
 }
 
+/* 상단 컨트롤 바 그룹 (정렬 드롭다운 + 뷰 전환 탭) */
+.catalog-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ⚡ 다차원 정렬 드롭다운 래퍼 (거리순, 난이도순, 리뷰순 등) */
+.sort-selector-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 10px 0 32px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+  height: 38px;
+  cursor: pointer;
+}
+
+.sort-selector-wrap:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.sort-selector-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
+}
+
+.sort-selector-wrap .sort-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 14px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* 정렬 네이티브 select (모바일 터치 및 PC 완벽 호환) */
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  padding-right: 18px;
+  height: 100%;
+  line-height: 38px;
+}
+
+/* 커스텀 화살표 아이콘 */
+.sort-selector-wrap::after {
+  content: '';
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sort-selector-wrap:focus-within::after {
+  border-color: var(--primary);
+  transform: translateY(-30%) rotate(-135deg);
+}
+
 /* 뷰 전환 탭 (목록 보기 vs 지도로 보기) */
 .view-switch-tabs {
   display: flex;
@@ -3004,17 +3083,34 @@ textarea:focus {
 
 /* 8. 모바일 정렬 컨트롤 반응형 */
 @media (max-width: 768px) {
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
   .catalog-controls-group {
     width: 100%;
+    display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
+    gap: 8px;
   }
   .sort-selector-wrap {
     flex: 1;
+    min-width: 130px;
+    height: 42px; /* 모바일 터치 최적화 42px */
+    padding: 0 8px 0 28px;
+  }
+  .sort-selector-wrap .sort-icon {
+    left: 8px;
+    font-size: 13px;
   }
   .sort-select {
     width: 100%;
-    font-size: 11.5px;
+    font-size: 12px;
+    line-height: 42px;
+    padding-right: 14px;
   }
   .view-switch-tabs {
     flex-shrink: 0;
