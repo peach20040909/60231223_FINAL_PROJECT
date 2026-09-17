@@ -495,7 +495,7 @@ body {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0 10px 0 32px;
+  padding: 0;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
   transition: all 0.2s ease;
   height: 38px;
@@ -512,15 +512,7 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
 }
 
-.sort-selector-wrap .sort-icon {
-  position: absolute;
-  left: 10px;
-  font-size: 14px;
-  pointer-events: none;
-  line-height: 1;
-}
-
-/* 정렬 네이티브 select (모바일 터치 및 PC 완벽 호환) */
+/* 정렬 네이티브 select (모바일 터치 및 PC 완벽 호환, 글자 잘림 방지) */
 .sort-select {
   appearance: none;
   -webkit-appearance: none;
@@ -528,34 +520,37 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-main);
   cursor: pointer;
-  padding-right: 18px;
   height: 100%;
-  line-height: 38px;
+  padding: 0 32px 0 12px;
+  line-height: normal;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* 커스텀 화살표 아이콘 */
 .sort-selector-wrap::after {
   content: '';
   position: absolute;
-  right: 11px;
+  right: 12px;
   top: 50%;
   width: 6px;
   height: 6px;
   border-right: 2px solid #64748b;
   border-bottom: 2px solid #64748b;
-  transform: translateY(-70%) rotate(45deg);
+  transform: translateY(-60%) rotate(45deg);
   pointer-events: none;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .sort-selector-wrap:focus-within::after {
   border-color: var(--primary);
-  transform: translateY(-30%) rotate(-135deg);
+  transform: translateY(-20%) rotate(-135deg);
 }
 
 /* 뷰 전환 탭 (목록 보기 vs 지도로 보기) */
@@ -2874,40 +2869,6 @@ textarea:focus {
   gap: 8px;
 }
 
-/* 3. ⚡ 다차원 정렬 셀렉터 */
-.sort-selector-wrap {
-  display: flex;
-  align-items: center;
-  background: #ffffff;
-  border: 1.5px solid var(--border-light);
-  border-radius: 12px;
-  padding: 0 10px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: all 0.2s ease;
-}
-.sort-selector-wrap:hover {
-  border-color: var(--border-focus);
-}
-.sort-selector-wrap:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(255, 82, 38, 0.12);
-}
-.sort-icon {
-  font-size: 13px;
-  color: var(--primary);
-  margin-right: 4px;
-}
-.sort-select {
-  border: none;
-  background: transparent;
-  padding: 7px 2px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-main);
-  cursor: pointer;
-  outline: none;
-  font-family: inherit;
-}
 
 /* 4. 카드 리뷰 영역 클릭 인터랙션 */
 .card-review-box.clickable {
@@ -3098,19 +3059,15 @@ textarea:focus {
   }
   .sort-selector-wrap {
     flex: 1;
-    min-width: 130px;
-    height: 42px; /* 모바일 터치 최적화 42px */
-    padding: 0 8px 0 28px;
-  }
-  .sort-selector-wrap .sort-icon {
-    left: 8px;
-    font-size: 13px;
+    min-width: 135px;
+    height: 40px; /* 모바일 터치 최적화 40px */
+    padding: 0;
   }
   .sort-select {
     width: 100%;
     font-size: 12px;
-    line-height: 42px;
-    padding-right: 14px;
+    line-height: normal;
+    padding: 0 28px 0 10px;
   }
   .view-switch-tabs {
     flex-shrink: 0;

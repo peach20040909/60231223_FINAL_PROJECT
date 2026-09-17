@@ -39,4 +39,4 @@ async function captureMapBefore() {
 captureMapBefore().catch(err => {
   console.error(err);
   process.exit(1);
-});
+  });
