@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>혼밥지도 로고 최종 후보 미리보기</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+    p { color: #94a3b8; font-size: 14px; margin-top: -15px; margin-bottom: 15px; }
+    .row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 280px;
+    }
+    .card h3 { font-size: 16px; margin: 0; color: #f1f5f9; }
+    .preview-box {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tab-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .preview-tab {
+      background: #ffffff;
+      padding: 7px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .preview-tab.dark {
+      background: #2b303c;
+      color: #f1f5f9;
+      box-shadow: none;
+      border: 1px solid #475569;
+    }
+    .tab-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .header-preview {
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0f172a;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>혼밥지도 (SoloMap) 로고 정밀 디자인</h1>
+  <p>브라우저 탭 파비콘 (16~20px) 및 상단 헤더 (38px) 동시 최적화</p>
+  
+  <div class="row">
+    <!-- 디자인 A: 마커 핀 + 따뜻한 밥공기 + 숟가락 (가장 직관적이고 완성도 높음) -->
+    <div class="card">
+      <h3>A안: 핀 속 밥공기 & 수저 (선명형)</h3>
+      <div class="preview-box">
+        <svg id="final-logo-a" width="108" height="108" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bgA" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FF5C2B"/>
+              <stop offset="100%" stop-color="#E83008"/>
+            </linearGradient>
+            <filter id="shadowA" x="18" y="14" width="92" height="100" filterUnits="userSpaceOnUse">
+              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.28" flood-color="#6E1500"/>
+            </filter>
+          </defs>
+          <rect width="128" height="128" rx="28" fill="url(#bgA)"/>
+          
+          <!-- 화이트 맵 핀 실루엣 -->
+          <g filter="url(#shadowA)">
+            <path d="M64 16C43 16 26 33 26 54C26 78.5 59 105 62.2 107.5C63.3 108.4 64.7 108.4 65.8 107.5C69 105 102 78.5 102 54C102 33 85 16 64 16Z" fill="#FFFFFF"/>
+          </g>
+          
+          <!-- 핀 내부: 밥공기 (진한 코랄) -->
+          <path d="M43 54C43 65.5 52.5 74 64 74C75.5 74 85 65.5 85 54H43Z" fill="#FF451A"/>
+          <!-- 밥그릇 굽 -->
+          <path d="M57 74H71V77C71 78 70 79 69 79H59C58 79 57 78 57 77V74Z" fill="#D93008"/>
+          <!-- 소복한 흰 쌀밥 -->
+          <path d="M44.5 54C45 47 52.5 42 64 42C75.5 42 83 47 83.5 54H44.5Z" fill="#FFF2EB"/>
+
+          <!-- 따뜻한 김 3줄기 -->
+          <path d="M54 36C52.5 33 55 30 53.5 27" stroke="#FF451A" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M64 35C62.5 31.5 65.5 28.5 64 25" stroke="#FF451A" stroke-width="3" stroke-linecap="round"/>
+          <path d="M74 36C72.5 33 75 30 73.5 27" stroke="#FF451A" stroke-width="2.6" stroke-linecap="round"/>
+
+          <!-- 우측 상단 반짝이 (맛집 발견) -->
+          <path d="M106 20L108 26L114 28L108 30L106 36L104 30L98 28L104 26L106 20Z" fill="#FFD54F"/>
+        </svg>
+      </div>
+
+      <div class="tab-container">
+        <div class="preview-tab">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-a"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="preview-tab dark">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-a"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="header-preview">
+          <div style="width:38px; height:38px; border-radius:10px; overflow:hidden; flex-shrink:0;">
+            <svg viewBox="0 0 128 128" fill="none" style="width:100%; height:100%;">
+              <use href="#final-logo-a"/>
+            </svg>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.2;">혼밥지도</span>
+            <span style="font-size:11px; font-weight:700; color:#ff5226; letter-spacing:0.5px;">SOLOMAP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 디자인 B: 밥그릇 핀 일체형 + 수저 & 포크 심볼 -->
+    <div class="card">
+      <h3>B안: 밥그릇 핀 & 수저 듀오</h3>
+      <div class="preview-box">
+        <svg id="final-logo-b" width="108" height="108" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bgB" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FF6B35"/>
+              <stop offset="100%" stop-color="#FF3815"/>
+            </linearGradient>
+            <filter id="shadowB" x="14" y="16" width="100" height="98" filterUnits="userSpaceOnUse">
+              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25" flood-color="#601000"/>
+            </filter>
+          </defs>
+          <rect width="128" height="128" rx="28" fill="url(#bgB)"/>
+          
+          <g filter="url(#shadowB)">
+            <!-- 밥그릇 둥근 몸체 -->
+            <path d="M26 56C26 78 44 94 64 94C84 94 102 78 102 56H26Z" fill="#FFFFFF"/>
+            <!-- 밥그릇 굽 & 핀 포인트 결합 -->
+            <path d="M54 94H74L64 107L54 94Z" fill="#FFFFFF"/>
+            
+            <!-- 소복한 밥 -->
+            <ellipse cx="64" cy="56" rx="36" ry="16" fill="#FFF0E6"/>
+            
+            <!-- 밥그릇 가운데 지도 핀 -->
+            <path d="M64 28C57.4 28 52 33.4 52 40C52 48.5 64 60 64 60C64 60 76 48.5 76 40C76 33.4 70.6 28 64 28Z" fill="#FF451A"/>
+            <circle cx="64" cy="38" r="4.2" fill="#FFFFFF"/>
+
+            <!-- 밥그릇의 귀여운 1인 혼밥 스마일 -->
+            <path d="M53 72C57 77 71 77 75 72" stroke="#FF5226" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="48" cy="68" r="2.5" fill="#FF8566"/>
+            <circle cx="80" cy="68" r="2.5" fill="#FF8566"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="tab-container">
+        <div class="preview-tab">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-b"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="preview-tab dark">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-b"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="header-preview">
+          <div style="width:38px; height:38px; border-radius:10px; overflow:hidden; flex-shrink:0;">
+            <svg viewBox="0 0 128 128" fill="none" style="width:100%; height:100%;">
+              <use href="#final-logo-b"/>
+            </svg>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.2;">혼밥지도</span>
+            <span style="font-size:11px; font-weight:700; color:#ff5226; letter-spacing:0.5px;">SOLOMAP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 디자인 C: 모던 미니멀 1인 식기 + 핀 (글로벌 푸드테크 스타일) -->
+    <div class="card">
+      <h3>C안: 푸드테크 미니멀 핀</h3>
+      <div class="preview-box">
+        <svg id="final-logo-c" width="108" height="108" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bgC" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FF5226"/>
+              <stop offset="100%" stop-color="#E53912"/>
+            </linearGradient>
+          </defs>
+          <rect width="128" height="128" rx="28" fill="url(#bgC)"/>
+          
+          <!-- 굵고 선명한 지도 핀 실루엣 -->
+          <path d="M64 16C43 16 26 33 26 54C26 78 59 104 62.5 106.8C63.4 107.5 64.6 107.5 65.5 106.8C69 104 102 78 102 54C102 33 85 16 64 16Z" fill="#FFFFFF"/>
+          
+          <!-- 원형 구멍 대신 맛있는 숟가락 & 젓가락 & 밥그릇 음각 -->
+          <path d="M44 56C44 67 53 76 64 76C75 76 84 67 84 56H44Z" fill="#FF5226"/>
+          <!-- 밥그릇 굽 -->
+          <rect x="58" y="76" width="12" height="3.5" rx="1.5" fill="#FF5226"/>
+          <!-- 모락모락 김 (2줄) -->
+          <path d="M56 46C54 41 58 37 56 32" stroke="#FF5226" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M72 46C70 41 74 37 72 32" stroke="#FF5226" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="tab-container">
+        <div class="preview-tab">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-c"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="preview-tab dark">
+          <svg class="tab-icon" viewBox="0 0 128 128" fill="none">
+            <use href="#final-logo-c"/>
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">혼밥지도 (SoloMap) - 명지대</span>
+        </div>
+        <div class="header-preview">
+          <div style="width:38px; height:38px; border-radius:10px; overflow:hidden; flex-shrink:0;">
+            <svg viewBox="0 0 128 128" fill="none" style="width:100%; height:100%;">
+              <use href="#final-logo-c"/>
+            </svg>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.2;">혼밥지도</span>
+            <span style="font-size:11px; font-weight:700; color:#ff5226; letter-spacing:0.5px;">SOLOMAP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

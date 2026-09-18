@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <!-- 소복한 쌀밥 그라데이션 -->
+    <linearGradient id="riceGradTrans" x1="64" y1="40" x2="64" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF0E6"/>
+    </linearGradient>
+
+    <!-- 지도 핀 그라데이션 -->
+    <linearGradient id="pinGradTrans" x1="64" y1="26" x2="64" y2="61" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF5226"/>
+      <stop offset="100%" stop-color="#E52D05"/>
+    </linearGradient>
+
+    <!-- 그림자 -->
+    <filter id="shadowTrans" x="14" y="16" width="100" height="99" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4.5" flood-opacity="0.18" flood-color="#000000"/>
+    </filter>
+  </defs>
+
+  <!-- 밥그릇 & 지도 핀 일체형 바디 (투명 배경용) -->
+  <g filter="url(#shadowTrans)">
+    <!-- 밥그릇 둥근 몸체 (순백색 도자기 + 얇은 테두리선으로 흰 배경에서도 선명함) -->
+    <path d="M26 56C26 78 44 94 64 94C84 94 102 78 102 56H26Z" fill="#FFFFFF" stroke="#FFE4D6" stroke-width="1.5"/>
+    <!-- 밥그릇 굽 & 하단 지도 핀 포인트 결합 -->
+    <path d="M53 94H75L64 108L53 94Z" fill="#FFFFFF" stroke="#FFE4D6" stroke-width="1.5"/>
+
+    <!-- 소복하게 담긴 따뜻한 쌀밥 -->
+    <ellipse cx="64" cy="56" rx="36" ry="16" fill="url(#riceGradTrans)"/>
+
+    <!-- 밥그릇 중앙 지도 핀 마커 -->
+    <path d="M64 26C56.8 26 51 31.8 51 39C51 48.2 64 61 64 61C64 61 77 48.2 77 39C77 31.8 71.2 26 64 26Z" fill="url(#pinGradTrans)"/>
+    <circle cx="64" cy="37.5" r="4.2" fill="#FFFFFF"/>
+
+    <!-- 따스하게 피어오르는 김 (오렌지 톤으로 흰 배경에서도 잘 보이게) -->
+    <path d="M41 42C39 37 42.5 33 40.5 28" stroke="#FF6B35" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M87 42C89 37 85.5 33 87.5 28" stroke="#FF6B35" stroke-width="2.6" stroke-linecap="round"/>
+
+    <!-- 편안하고 기분 좋은 1인 혼밥 스마일 미소 -->
+    <path d="M53 72C57 77.5 71 77.5 75 72" stroke="#FF481C" stroke-width="3.2" stroke-linecap="round"/>
+    <!-- 사랑스러운 볼터치 -->
+    <circle cx="47" cy="69" r="2.8" fill="#FFA38A"/>
+    <circle cx="81" cy="69" r="2.8" fill="#FFA38A"/>
+  </g>
+</svg>

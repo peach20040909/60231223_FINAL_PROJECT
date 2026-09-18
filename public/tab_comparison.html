@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f1f3f4;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5f6368;
+    }
+    /* Chrome 탭 바 1:1 재현 */
+    .tab-bar {
+      background: #dfe1e5;
+      padding: 8px 12px 0;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: flex-end;
+      border-bottom: 1px solid #cfd1d5;
+      width: fit-content;
+    }
+    .tab {
+      background: #ffffff;
+      padding: 8px 14px 8px 12px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #202124;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      width: 260px;
+    }
+    .tab img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .tab span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+    }
+    .tab .close-btn {
+      margin-left: auto;
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    /* 이전 vs 이후 비교 박스 */
+    .compare-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 12px;
+      padding: 24px;
+      width: 600px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge-before {
+      background: #f1f3f4;
+      color: #70757a;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      width: 60px;
+      text-align: center;
+    }
+    .badge-after {
+      background: #ffede8;
+      color: #ff5226;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      width: 60px;
+      text-align: center;
+    }
+    .tab-mock {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 320px;
+      font-size: 13px;
+      color: #202124;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .tab-mock.new {
+      border: 1.5px solid #ff5226;
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="compare-container">
+    <div style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:4px;">
+      브라우저 탭 파비콘 반영 비교
+    </div>
+    <div style="font-size:13px; color:#64748b; margin-bottom:12px;">
+      포트 3001에서 실행 중인 혼밥지도 브라우저 탭 아이콘 변경 결과
+    </div>
+
+    <!-- 변경 전 -->
+    <div class="row">
+      <div class="badge-before">변경 전</div>
+      <div class="tab-mock">
+        <!-- 기본 지구본 아이콘 (회색) -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+        <span style="font-weight:500;">혼밥지도 (SoloMap) - 명지대...</span>
+      </div>
+    </div>
+
+    <!-- 변경 후 -->
+    <div class="row">
+      <div class="badge-after">변경 후</div>
+      <div class="tab-mock new">
+        <img src="/logo.png" width="18" height="18" style="border-radius:4px;" alt="새 로고">
+        <span style="font-weight:700; color:#0f172a;">혼밥지도 (SoloMap) - 명지대...</span>
+        <span style="margin-left:auto; font-size:11px; background:#ff5226; color:#fff; padding:2px 6px; border-radius:4px; font-weight:700;">적용완료</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # 📘 명지대학교 혼밥지도 (`solo-map`) 개발 & 트러블슈팅 백서
 > **부제**: 사용자 피드백 기반 12가지 기술적 난제 해결과 아키텍처 진화 과정  
-> **프로젝트**: 60231223_FINAL_PROJECT (고급웹프로그래밍 Final Project)  
+> **프로젝트**: MJU_solomap (고급웹프로그래밍 Final Project)  
 > **저자**: 명지대학교 융합소프트웨어학부  
 > **기술 스택**: Node.js, Express 5, TypeScript, Kakao Local API, Naver Maps API v3, Leaflet Map (CartoDB Voyager), Google GenAI SDK (Gemini 2.5 Flash), Vanilla JS & Modern Clean CSS  
 
